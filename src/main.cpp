@@ -5,7 +5,7 @@
 #include <set>
 #include <future>
 
-#include <threading/dispatcher/dispatcher.h>
+#include <threading/dispatcher/dispatchers.h>
 #include <singleton/singleton.h>
 
 class SomeClass {
@@ -54,7 +54,6 @@ int main() {
         }, i, std::ref(check));
         futures.push_back(std::move(future));
     }
-
 
     std::cout << check << std::endl;
     

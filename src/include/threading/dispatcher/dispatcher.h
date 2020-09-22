@@ -150,11 +150,4 @@ protected:
     virtual void dispatch(std::unique_ptr<BasePack>&& pack) = 0;
 };
 
-void initializeDispatchers();
-
-Dispatcher* unstable();
-Dispatcher* single();
-Dispatcher* io();
-Dispatcher* computation();
-
 }
