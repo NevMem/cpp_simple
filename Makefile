@@ -123,32 +123,32 @@ result.o/fast:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/build
 .PHONY : result.o/fast
 
-src/impl/threading/dispatcher/dispatcher.o: src/impl/threading/dispatcher/dispatcher.cpp.o
+src/impl/threading/dispatcher/dispatchers.o: src/impl/threading/dispatcher/dispatchers.cpp.o
 
-.PHONY : src/impl/threading/dispatcher/dispatcher.o
+.PHONY : src/impl/threading/dispatcher/dispatchers.o
 
 # target to build an object file
-src/impl/threading/dispatcher/dispatcher.cpp.o:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatcher.cpp.o
-.PHONY : src/impl/threading/dispatcher/dispatcher.cpp.o
+src/impl/threading/dispatcher/dispatchers.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.o
+.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.o
 
-src/impl/threading/dispatcher/dispatcher.i: src/impl/threading/dispatcher/dispatcher.cpp.i
+src/impl/threading/dispatcher/dispatchers.i: src/impl/threading/dispatcher/dispatchers.cpp.i
 
-.PHONY : src/impl/threading/dispatcher/dispatcher.i
+.PHONY : src/impl/threading/dispatcher/dispatchers.i
 
 # target to preprocess a source file
-src/impl/threading/dispatcher/dispatcher.cpp.i:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatcher.cpp.i
-.PHONY : src/impl/threading/dispatcher/dispatcher.cpp.i
+src/impl/threading/dispatcher/dispatchers.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.i
+.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.i
 
-src/impl/threading/dispatcher/dispatcher.s: src/impl/threading/dispatcher/dispatcher.cpp.s
+src/impl/threading/dispatcher/dispatchers.s: src/impl/threading/dispatcher/dispatchers.cpp.s
 
-.PHONY : src/impl/threading/dispatcher/dispatcher.s
+.PHONY : src/impl/threading/dispatcher/dispatchers.s
 
 # target to generate assembly for a file
-src/impl/threading/dispatcher/dispatcher.cpp.s:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatcher.cpp.s
-.PHONY : src/impl/threading/dispatcher/dispatcher.cpp.s
+src/impl/threading/dispatcher/dispatchers.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.s
+.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.s
 
 src/main.o: src/main.cpp.o
 
@@ -186,9 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... result.o"
-	@echo "... src/impl/threading/dispatcher/dispatcher.o"
-	@echo "... src/impl/threading/dispatcher/dispatcher.i"
-	@echo "... src/impl/threading/dispatcher/dispatcher.s"
+	@echo "... src/impl/threading/dispatcher/dispatchers.o"
+	@echo "... src/impl/threading/dispatcher/dispatchers.i"
+	@echo "... src/impl/threading/dispatcher/dispatchers.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
