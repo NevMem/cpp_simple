@@ -163,7 +163,7 @@ void initializeDispatchers()
     singleton::singleton<UnstableDispatcher>();
     singleton::singleton<SingleThreadDispatcher>();
     singleton::singleton<ThreadPoolDispatcher<4>, 0>();
-    singleton::singleton<ThreadPoolDispatcher<4>, 1>();
+    singleton::singleton<ThreadPoolDispatcher<8>, 1>();
 }
 
 Dispatcher* unstable()
