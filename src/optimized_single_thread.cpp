@@ -60,7 +60,7 @@ private:
             currentBest_ = current_;
         }
 
-        if (calculateUpperBound(items, capacity, current_, minUnusedIndex) < currentBest_.cost) {
+        if (calculateUpperBound(items, capacity, current_, minUnusedIndex) <= currentBest_.cost) {
             return;
         }
 
