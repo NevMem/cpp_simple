@@ -123,6 +123,33 @@ result.o/fast:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/build
 .PHONY : result.o/fast
 
+src/comparator.o: src/comparator.cpp.o
+
+.PHONY : src/comparator.o
+
+# target to build an object file
+src/comparator.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/comparator.cpp.o
+.PHONY : src/comparator.cpp.o
+
+src/comparator.i: src/comparator.cpp.i
+
+.PHONY : src/comparator.i
+
+# target to preprocess a source file
+src/comparator.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/comparator.cpp.i
+.PHONY : src/comparator.cpp.i
+
+src/comparator.s: src/comparator.cpp.s
+
+.PHONY : src/comparator.s
+
+# target to generate assembly for a file
+src/comparator.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/comparator.cpp.s
+.PHONY : src/comparator.cpp.s
+
 src/impl/threading/dispatcher/dispatchers.o: src/impl/threading/dispatcher/dispatchers.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/dispatchers.o
@@ -177,6 +204,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/sinlge_thread.o: src/sinlge_thread.cpp.o
+
+.PHONY : src/sinlge_thread.o
+
+# target to build an object file
+src/sinlge_thread.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.o
+.PHONY : src/sinlge_thread.cpp.o
+
+src/sinlge_thread.i: src/sinlge_thread.cpp.i
+
+.PHONY : src/sinlge_thread.i
+
+# target to preprocess a source file
+src/sinlge_thread.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.i
+.PHONY : src/sinlge_thread.cpp.i
+
+src/sinlge_thread.s: src/sinlge_thread.cpp.s
+
+.PHONY : src/sinlge_thread.s
+
+# target to generate assembly for a file
+src/sinlge_thread.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.s
+.PHONY : src/sinlge_thread.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -186,12 +240,18 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... result.o"
+	@echo "... src/comparator.o"
+	@echo "... src/comparator.i"
+	@echo "... src/comparator.s"
 	@echo "... src/impl/threading/dispatcher/dispatchers.o"
 	@echo "... src/impl/threading/dispatcher/dispatchers.i"
 	@echo "... src/impl/threading/dispatcher/dispatchers.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/sinlge_thread.o"
+	@echo "... src/sinlge_thread.i"
+	@echo "... src/sinlge_thread.s"
 .PHONY : help
 
 
