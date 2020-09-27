@@ -35,7 +35,7 @@ def check(output_file, real_file):
         return False
    
 
-def runSmallTests(runs=5):
+def runSmallTests(runs=5, runParams=[]):
     test_dir = '/Users/yaigor/Desktop/lab_1/small_tests'
     input_files = []
     output_files = []
@@ -47,8 +47,12 @@ def runSmallTests(runs=5):
 
     oks = 0
 
+    whole_delta = 0
+
     for (input_file, output_file) in zip(input_files, output_files):
         args = ["./result.o"]
+        for param in runParams:
+            args.append(param)
         delta = 0
         for i in range(runs):
             start = time.time()
@@ -56,10 +60,10 @@ def runSmallTests(runs=5):
             proc.wait()
             delta += time.time() - start
         delta /= runs
-        print(input_file, delta)
+        whole_delta += delta
 
         oks += check("output.txt", test_dir + "/" + output_file)
-    print(oks, '/', len(input_files))
+    return (whole_delta, (oks * 1.0) / len(input_files))
 
 
 def runLargeTests():
@@ -82,7 +86,11 @@ def runLargeTests():
 
 def main():
     make()
-    runSmallTests(2)
+    runTime, oks = runSmallTests(10)
+    print(runTime, oks)
+
+    runTime, oks = runSmallTests(10, ["useSimpleOpt"])
+    print(runTime, oks)
     # runLargeTests()
 
 if __name__ == '__main__':

@@ -20,10 +20,21 @@ public:
             return first.cost * second.size > second.cost * first.size;
         });
         run(sortedItems, capacity);
-        return currentBest_;
+        return toResult(currentBest_);
     }
 
 private:
+    struct InternalResult {
+        uint32_t cost;
+        uint32_t capacity;
+        std::vector<unsigned int> indices;
+    };
+
+    inline Result toResult(const InternalResult& result)
+    {
+        return Result { result.cost, result.capacity, {result.indices.begin(), result.indices.end()} };
+    }
+
     void run(const std::vector<Item>& items, size_t capacity, size_t minUnusedIndex = 0)
     {
         if (currentBest_.cost < current_.cost) {
@@ -47,19 +58,19 @@ private:
             if (current_.capacity + items[i].size <= capacity) {
                 current_.capacity += items[i].size;
                 current_.cost += items[i].cost;
-                current_.indices.insert(i);
+                current_.indices.push_back(i);
 
                 run(items, capacity, i + 1);
 
-                current_.indices.erase(i);
+                current_.indices.pop_back();
                 current_.capacity -= items[i].size;
                 current_.cost -= items[i].cost;
             }
         }
     }
 
-    Result currentBest_ = Result { 0, 0, {} };
-    Result current_ = Result { 0, 0, {} }; // Used while running
+    InternalResult currentBest_ = InternalResult { 0, 0, {} };
+    InternalResult current_ = InternalResult { 0, 0, {} }; // Used while running
 
     bool useSimpleOpt_;
 };
