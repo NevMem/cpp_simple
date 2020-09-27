@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 
+#include <threading/dispatcher/dispatchers.h>
+
 namespace {
 
 double calculateUpperBound(
@@ -64,22 +66,28 @@ private:
             currentBest_ = current_;
         }
 
-        std::vector<size_t> shouldTry;
+        std::vector<std::future<size_t>> validation;
 
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current_.capacity + items[i].size <= capacity) {
-                if (calculateUpperBound(
-                    items,
-                    capacity,
-                    current_.capacity + items[i].size,
-                    current_.cost + items[i].cost,
-                    i + 1) >= currentBest_.cost) {
-                        shouldTry.push_back(i);
+                validation.push_back(threading::dispatcher::computation()->async([this, capacity](size_t i, const std::vector<Item>& items) -> size_t {
+                    if (calculateUpperBound(
+                        items,
+                        capacity,
+                        current_.capacity + items[i].size,
+                        current_.cost + items[i].cost,
+                        i + 1) >= currentBest_.cost) {
+                        return i;
+                    } else {
+                        return -1;
                     }
+                }, i, items));
             }
         }
 
-        for (const auto& index : shouldTry) {
+        for (auto& future : validation) {
+            const auto index = future.get();
+            if (index == -1) continue;
             current_.capacity += items[index].size;
             current_.cost += items[index].cost;
             current_.indices.insert(index);
