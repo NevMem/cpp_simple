@@ -68,6 +68,7 @@ def runLargeTests():
             print("Done")
         except:
             print("Timeout")
+            proc.terminate()
 
 def main():
     make()
