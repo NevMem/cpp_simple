@@ -50,6 +50,8 @@ def runSmallTests(runs=5, runParams=[]):
     whole_delta = 0
 
     for (input_file, output_file) in zip(input_files, output_files):
+        if input_file != '40.in':
+            continue
         args = ["./result.o"]
         for param in runParams:
             args.append(param)
@@ -62,7 +64,8 @@ def runSmallTests(runs=5, runParams=[]):
         delta /= runs
         whole_delta += delta
 
-        oks += check("output.txt", test_dir + "/" + output_file)
+        if check("output.txt", test_dir + "/" + output_file):
+            oks += 1
     return (whole_delta, (oks * 1.0) / len(input_files))
 
 
@@ -86,10 +89,11 @@ def runLargeTests():
 
 def main():
     make()
-    runTime, oks = runSmallTests(10)
+    runs = 1
+    runTime, oks = runSmallTests(runs)
     print(runTime, oks)
 
-    runTime, oks = runSmallTests(10, ["useSimpleOpt"])
+    runTime, oks = runSmallTests(runs, ["useSimpleOpt"])
     print(runTime, oks)
     # runLargeTests()
 

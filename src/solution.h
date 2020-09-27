@@ -25,5 +25,6 @@ public:
     virtual Result solve(const std::vector<Item>& items, size_t capacity) = 0;
 };
 
-std::unique_ptr<Solution> createSingleThreadSolution(int argc, char** argv);
+std::unique_ptr<Solution> createSingleThreadSolution();
+std::unique_ptr<Solution> createOptimizedSingleThreadSolution();
 std::unique_ptr<Solution> createMultiThreadSolution();

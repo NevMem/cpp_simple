@@ -258,6 +258,33 @@ src/multi_thread.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/multi_thread.cpp.s
 .PHONY : src/multi_thread.cpp.s
 
+src/optimized_single_thread.o: src/optimized_single_thread.cpp.o
+
+.PHONY : src/optimized_single_thread.o
+
+# target to build an object file
+src/optimized_single_thread.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/optimized_single_thread.cpp.o
+.PHONY : src/optimized_single_thread.cpp.o
+
+src/optimized_single_thread.i: src/optimized_single_thread.cpp.i
+
+.PHONY : src/optimized_single_thread.i
+
+# target to preprocess a source file
+src/optimized_single_thread.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/optimized_single_thread.cpp.i
+.PHONY : src/optimized_single_thread.cpp.i
+
+src/optimized_single_thread.s: src/optimized_single_thread.cpp.s
+
+.PHONY : src/optimized_single_thread.s
+
+# target to generate assembly for a file
+src/optimized_single_thread.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/optimized_single_thread.cpp.s
+.PHONY : src/optimized_single_thread.cpp.s
+
 src/sinlge_thread.o: src/sinlge_thread.cpp.o
 
 .PHONY : src/sinlge_thread.o
@@ -309,6 +336,9 @@ help:
 	@echo "... src/multi_thread.o"
 	@echo "... src/multi_thread.i"
 	@echo "... src/multi_thread.s"
+	@echo "... src/optimized_single_thread.o"
+	@echo "... src/optimized_single_thread.i"
+	@echo "... src/optimized_single_thread.s"
 	@echo "... src/sinlge_thread.o"
 	@echo "... src/sinlge_thread.i"
 	@echo "... src/sinlge_thread.s"
