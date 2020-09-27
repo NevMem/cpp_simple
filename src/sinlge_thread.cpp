@@ -3,10 +3,16 @@
 #include <numeric>
 #include <iostream>
 
+#include <cmd/cmd_utils.h>
+
 namespace {
 
 class SingleThreadSolution : public Solution {
 public:
+    SingleThreadSolution(int argc, char** argv)
+    : useSimpleOpt_(cmd::hasValueInArgs(argc, argv, "useSimpleOpt"))
+    {}
+
     virtual Result solve(const std::vector<Item>& items, size_t capacity) override
     {
         std::vector<Item> sortedItems = items;
@@ -22,7 +28,7 @@ private:
     {
         if (currentBest_.cost < current_.cost) {
             currentBest_ = current_;
-        } else {
+        } else if (useSimpleOpt_) {
             double upperBound = current_.cost;
             size_t remainingCap = capacity - current_.capacity;
             for (size_t i = minUnusedIndex; i != items.size(); ++i) {
@@ -54,11 +60,13 @@ private:
 
     Result currentBest_ = Result { 0, 0, {} };
     Result current_ = Result { 0, 0, {} }; // Used while running
+
+    bool useSimpleOpt_;
 };
 
 }
 
-std::unique_ptr<Solution> createSingleThreadSolution()
+std::unique_ptr<Solution> createSingleThreadSolution(int argc, char** argv)
 {
-    return std::make_unique<SingleThreadSolution>();
+    return std::make_unique<SingleThreadSolution>(argc, argv);
 }

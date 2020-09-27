@@ -14,7 +14,7 @@ std::unique_ptr<Solution> createSolution(int argc, char** argv)
 {
     auto solutionType = cmd::getValue(argc, argv, "solutionType");
     if (!solutionType || *solutionType == "single") {
-        return createSingleThreadSolution();
+        return createSingleThreadSolution(argc, argv);
     }
     return createMultiThreadSolution();    
 }
