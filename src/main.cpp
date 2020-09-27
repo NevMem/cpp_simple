@@ -6,12 +6,14 @@
 #include <future>
 
 #include <threading/dispatcher/dispatchers.h>
+#include <cmd/cmd_utils.h>
 
 #include "solution.h"
 
 std::unique_ptr<Solution> createSolution(int argc, char** argv)
 {
-    if (argc <= 1 || (argc >= 2 && argv[0] == "single")) {
+    auto solutionType = cmd::getValue(argc, argv, "solutionType");
+    if (!solutionType || *solutionType == "single") {
         return createSingleThreadSolution();
     }
     return createMultiThreadSolution();    

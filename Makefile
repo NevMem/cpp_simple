@@ -150,6 +150,33 @@ src/comparator.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/comparator.cpp.s
 .PHONY : src/comparator.cpp.s
 
+src/impl/cmd/cmd_utils.o: src/impl/cmd/cmd_utils.cpp.o
+
+.PHONY : src/impl/cmd/cmd_utils.o
+
+# target to build an object file
+src/impl/cmd/cmd_utils.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/cmd/cmd_utils.cpp.o
+.PHONY : src/impl/cmd/cmd_utils.cpp.o
+
+src/impl/cmd/cmd_utils.i: src/impl/cmd/cmd_utils.cpp.i
+
+.PHONY : src/impl/cmd/cmd_utils.i
+
+# target to preprocess a source file
+src/impl/cmd/cmd_utils.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/cmd/cmd_utils.cpp.i
+.PHONY : src/impl/cmd/cmd_utils.cpp.i
+
+src/impl/cmd/cmd_utils.s: src/impl/cmd/cmd_utils.cpp.s
+
+.PHONY : src/impl/cmd/cmd_utils.s
+
+# target to generate assembly for a file
+src/impl/cmd/cmd_utils.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/cmd/cmd_utils.cpp.s
+.PHONY : src/impl/cmd/cmd_utils.cpp.s
+
 src/impl/threading/dispatcher/dispatchers.o: src/impl/threading/dispatcher/dispatchers.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/dispatchers.o
@@ -270,6 +297,9 @@ help:
 	@echo "... src/comparator.o"
 	@echo "... src/comparator.i"
 	@echo "... src/comparator.s"
+	@echo "... src/impl/cmd/cmd_utils.o"
+	@echo "... src/impl/cmd/cmd_utils.i"
+	@echo "... src/impl/cmd/cmd_utils.s"
 	@echo "... src/impl/threading/dispatcher/dispatchers.o"
 	@echo "... src/impl/threading/dispatcher/dispatchers.i"
 	@echo "... src/impl/threading/dispatcher/dispatchers.s"
