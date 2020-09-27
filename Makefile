@@ -204,6 +204,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/multi_thread.o: src/multi_thread.cpp.o
+
+.PHONY : src/multi_thread.o
+
+# target to build an object file
+src/multi_thread.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/multi_thread.cpp.o
+.PHONY : src/multi_thread.cpp.o
+
+src/multi_thread.i: src/multi_thread.cpp.i
+
+.PHONY : src/multi_thread.i
+
+# target to preprocess a source file
+src/multi_thread.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/multi_thread.cpp.i
+.PHONY : src/multi_thread.cpp.i
+
+src/multi_thread.s: src/multi_thread.cpp.s
+
+.PHONY : src/multi_thread.s
+
+# target to generate assembly for a file
+src/multi_thread.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/multi_thread.cpp.s
+.PHONY : src/multi_thread.cpp.s
+
 src/sinlge_thread.o: src/sinlge_thread.cpp.o
 
 .PHONY : src/sinlge_thread.o
@@ -249,6 +276,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/multi_thread.o"
+	@echo "... src/multi_thread.i"
+	@echo "... src/multi_thread.s"
 	@echo "... src/sinlge_thread.o"
 	@echo "... src/sinlge_thread.i"
 	@echo "... src/sinlge_thread.s"

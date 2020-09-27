@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess as sp
+import time
 
 def make():
     proc = sp.Popen(["cmake", "."], stdout=sp.PIPE)
@@ -28,12 +29,13 @@ def check(output_file, real_file):
             print("Answers doesn't match, found:", output_answer, "expected:", real_answer)
             print(output_parts, real_parts)
         else:
-            print('Parts doesn`t match')
-            print(output_parts, real_parts)
+            # print('Parts doesn`t match')
+            # print(output_parts, real_parts)
+            return True
         return False
    
 
-def runSmallTests():
+def runSmallTests(runs=5):
     test_dir = '/Users/yaigor/Desktop/lab_1/small_tests'
     input_files = []
     output_files = []
@@ -47,8 +49,14 @@ def runSmallTests():
 
     for (input_file, output_file) in zip(input_files, output_files):
         args = ["./result.o"]
-        proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
-        proc.wait()
+        delta = 0
+        for i in range(runs):
+            start = time.time()
+            proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
+            proc.wait()
+            delta += time.time() - start
+        delta /= runs
+        print(input_file, delta)
 
         oks += check("output.txt", test_dir + "/" + output_file)
     print(oks, '/', len(input_files))
@@ -66,7 +74,7 @@ def runLargeTests():
         args = ["./result.o"]
         proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
-            proc.wait(1)
+            proc.wait(10)
             print("Done")
         except:
             print("Timeout")
@@ -74,8 +82,8 @@ def runLargeTests():
 
 def main():
     make()
-    runSmallTests()
-    runLargeTests()
+    runSmallTests(2)
+    # runLargeTests()
 
 if __name__ == '__main__':
     main()

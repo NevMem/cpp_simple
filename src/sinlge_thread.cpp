@@ -1,12 +1,19 @@
 #include "solution.h"
 
+#include <numeric>
+#include <iostream>
+
 namespace {
 
 class SingleThreadSolution : public Solution {
 public:
     virtual Result solve(const std::vector<Item>& items, size_t capacity) override
     {
-        run(items, capacity);
+        std::vector<Item> sortedItems = items;
+        std::sort(sortedItems.begin(), sortedItems.end(), [](const Item& first, const Item& second) {
+            return first.cost * second.size > second.cost * first.size;
+        });
+        run(sortedItems, capacity);
         return currentBest_;
     }
 
@@ -15,6 +22,39 @@ private:
     {
         if (currentBest_.cost < current_.cost) {
             currentBest_ = current_;
+        }
+
+        {
+            const auto wholeRemainingCost = std::accumulate(
+                items.begin() + minUnusedIndex,
+                items.end(),
+                0,
+                [](size_t cost, const Item& item) { return cost + item.cost; });
+            if (current_.cost + wholeRemainingCost <= currentBest_.cost) {
+                return;
+            }
+        }
+
+        {
+            std::vector<int> can(capacity + 1, false);
+            can[current_.capacity] = true;
+            for (size_t i = minUnusedIndex; i != items.size(); ++i) {
+                for (int cap = capacity; cap >= static_cast<int>(current_.capacity); --cap) {
+                    if (can[cap]) {
+                        int afterAdd = cap + items[i].size;
+                        if (afterAdd <= capacity) {
+                            can[afterAdd] = true;
+                        }
+                    }
+                }
+            }
+            bool canAdd = false;
+            for (size_t i = current_.capacity + 1; i != capacity + 1; ++i) {
+                canAdd |= can[i];
+            }
+            if (!canAdd) {
+                return;
+            }
         }
 
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
