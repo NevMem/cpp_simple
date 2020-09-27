@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    inline Result toResult(const Result& result, const std::vector<size_t>& permutation)
+    inline Result toResult(const Result& result, const std::vector<size_t>& permutation) const
     {
         std::unordered_map<size_t, size_t> backPermutation;
         for (size_t i = 0; i != permutation.size(); ++i) {
