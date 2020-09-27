@@ -44,6 +44,8 @@ std::unique_ptr<Solution> createSolution(int argc, char** argv)
     return createMultiThreadSolution();    
 }
 
+#include <bitset>
+
 int main(int argc, char** argv) {
     threading::dispatcher::initializeDispatchers();
 

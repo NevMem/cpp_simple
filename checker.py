@@ -67,7 +67,7 @@ def runSmallTests(runs=5, runParams=[]):
     return (whole_delta, (oks * 1.0) / len(input_files))
 
 
-def runLargeTests():
+def runLargeTests(runParams=[]):
     test_dir = '/Users/yaigor/Desktop/lab_1/tests_100'
     input_files = []
     for file in os.listdir(test_dir):
@@ -77,10 +77,14 @@ def runLargeTests():
 
     for input_file in input_files:
         args = ["./result.o"]
+        for param in runParams:
+            args.append(param)
+        
+        start = time.time()
         proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
             proc.wait(10)
-            print("Done")
+            print("Done", time.time() - start)
         except:
             print("Timeout")
             proc.terminate()
@@ -88,15 +92,15 @@ def runLargeTests():
 def main():
     make()
     runs = 10
-    runTime, oks = runSmallTests(runs)
-    print(runTime, oks)
 
     runTime, oks = runSmallTests(runs, ["mode=single_opt"])
     print(runTime, oks)
 
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
-    # runLargeTests()
+
+    # runLargeTests(["mode=single_opt"])
+    # runLargeTests(["mode=multi"])
 
 if __name__ == '__main__':
     main()

@@ -6,6 +6,74 @@
 
 namespace {
 
+class Bitset {
+public:
+    explicit Bitset(size_t size)
+    : size_(size)
+    {
+        const auto dataSize = (size_ + 63) / 64;
+        data_.reserve(dataSize);
+        for (size_t i = 0; i != dataSize; ++i) {
+            data_.push_back(0);
+        }
+    }
+
+    Bitset(Bitset&& other)
+    : size_(std::move(other.size_))
+    , data_(std::move(other.data_))
+    {}
+
+    Bitset& operator=(const Bitset& other)
+    {
+        size_ = other.size_;
+        data_ = other.data_;
+        return *this;
+    }
+
+    Bitset& operator=(Bitset&& other)
+    {
+        size_ = other.size_;
+        data_ = std::move(other.data_);
+        return *this;
+    }
+
+    bool get(size_t index) const
+    {
+        const auto block = index / 64;
+        return (data_[block] & (1ull << (block % 64))) != 0;
+    }
+
+    void set(size_t index, bool value)
+    {
+        const auto block = index / 64;
+        if (value) {
+            data_[block] |= (1ull << (block % 64));
+        } else {
+            data_[block] &= ~(1ull << (block % 64));
+        }
+    }
+
+    std::vector<size_t> asVector() const
+    {
+        std::vector<size_t> res;
+        for (size_t i = 0; i != size(); ++i) {
+            if (get(i)) {
+                res.push_back(i);
+            }
+        }
+        return res;
+    }
+
+    size_t size() const
+    {
+        return size_;        
+    }
+
+private:
+    size_t size_;
+    std::vector<uint64_t> data_;
+};
+
 double calculateUpperBound(
     const std::vector<Item>& items,
     size_t capacity,
@@ -42,6 +110,7 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
+        current_.used = Bitset(items.size());
         run(sortedItems, capacity);
         return toResult(currentBest_, permutation);
     }
@@ -50,7 +119,7 @@ private:
     struct InternalResult {
         uint32_t cost;
         uint32_t capacity;
-        std::vector<unsigned int> indices;
+        Bitset used;
     };
 
     inline Result toResult(const InternalResult& result, const std::vector<size_t>& permutation) const
@@ -60,7 +129,7 @@ private:
             backPermutation[i] = permutation[i];
         }
         std::set<unsigned int> res;
-        for (const auto& value : result.indices) {
+        for (const auto& value : result.used.asVector()) {
             res.insert(backPermutation[value]);
         }
         return Result { result.cost, result.capacity, res };
@@ -87,7 +156,7 @@ private:
                     } else {
                         return -1;
                     }
-                }, i, items));
+                }, i, std::cref(items)));
             }
         }
 
@@ -96,18 +165,18 @@ private:
             if (index == -1) continue;
             current_.capacity += items[index].size;
             current_.cost += items[index].cost;
-            current_.indices.push_back(index);
+            current_.used.set(index, true);
 
             run(items, capacity, index + 1);
 
-            current_.indices.pop_back();
+            current_.used.set(index, false);
             current_.capacity -= items[index].size;
             current_.cost -= items[index].cost;
         }
     }
 
-    InternalResult currentBest_ = InternalResult { 0, 0, {} };
-    InternalResult current_ = InternalResult { 0, 0, {} };
+    InternalResult currentBest_ = InternalResult { 0, 0, Bitset(0) };
+    InternalResult current_ = InternalResult { 0, 0, Bitset(0) };
 };
 
 }
