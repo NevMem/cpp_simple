@@ -22,37 +22,17 @@ private:
     {
         if (currentBest_.cost < current_.cost) {
             currentBest_ = current_;
-        }
-
-        {
-            const auto wholeRemainingCost = std::accumulate(
-                items.begin() + minUnusedIndex,
-                items.end(),
-                0,
-                [](size_t cost, const Item& item) { return cost + item.cost; });
-            if (current_.cost + wholeRemainingCost <= currentBest_.cost) {
-                return;
-            }
-        }
-
-        {
-            std::vector<int> can(capacity + 1, false);
-            can[current_.capacity] = true;
+        } else {
+            double upperBound = current_.cost;
+            size_t remainingCap = capacity - current_.capacity;
             for (size_t i = minUnusedIndex; i != items.size(); ++i) {
-                for (int cap = capacity; cap >= static_cast<int>(current_.capacity); --cap) {
-                    if (can[cap]) {
-                        int afterAdd = cap + items[i].size;
-                        if (afterAdd <= capacity) {
-                            can[afterAdd] = true;
-                        }
-                    }
-                }
+                if (remainingCap == 0)
+                    break;
+                size_t capNow = std::min(static_cast<uint32_t>(remainingCap), items[i].size);
+                upperBound += capNow * (static_cast<double>(items[i].cost) / items[i].size);
+                remainingCap -= capNow;
             }
-            bool canAdd = false;
-            for (size_t i = current_.capacity + 1; i != capacity + 1; ++i) {
-                canAdd |= can[i];
-            }
-            if (!canAdd) {
+            if (upperBound <= currentBest_.cost) {
                 return;
             }
         }
