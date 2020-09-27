@@ -47,7 +47,13 @@ public:
     }
 
 private:
-    inline Result toResult(const Result& result, const std::vector<size_t>& permutation) const
+    struct InternalResult {
+        uint32_t cost;
+        uint32_t capacity;
+        std::vector<unsigned int> indices;
+    };
+
+    inline Result toResult(const InternalResult& result, const std::vector<size_t>& permutation) const
     {
         std::unordered_map<size_t, size_t> backPermutation;
         for (size_t i = 0; i != permutation.size(); ++i) {
@@ -90,18 +96,18 @@ private:
             if (index == -1) continue;
             current_.capacity += items[index].size;
             current_.cost += items[index].cost;
-            current_.indices.insert(index);
+            current_.indices.push_back(index);
 
             run(items, capacity, index + 1);
 
-            current_.indices.erase(index);
+            current_.indices.pop_back();
             current_.capacity -= items[index].size;
             current_.cost -= items[index].cost;
         }
     }
 
-    Result currentBest_ = Result { 0, 0, {} };
-    Result current_ = Result { 0, 0, {} };
+    InternalResult currentBest_ = InternalResult { 0, 0, {} };
+    InternalResult current_ = InternalResult { 0, 0, {} };
 };
 
 }
