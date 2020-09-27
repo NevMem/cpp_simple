@@ -50,8 +50,6 @@ def runSmallTests(runs=5, runParams=[]):
     whole_delta = 0
 
     for (input_file, output_file) in zip(input_files, output_files):
-        # if input_file != '40.in':
-        #     continue
         args = ["./result.o"]
         for param in runParams:
             args.append(param)
@@ -93,7 +91,7 @@ def main():
     runTime, oks = runSmallTests(runs)
     print(runTime, oks)
 
-    runTime, oks = runSmallTests(runs, ["useSimpleOpt"])
+    runTime, oks = runSmallTests(runs, ["mode=single_opt"])
     print(runTime, oks)
     # runLargeTests()
 

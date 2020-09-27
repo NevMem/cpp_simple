@@ -12,11 +12,11 @@
 
 std::unique_ptr<Solution> createSolution(int argc, char** argv)
 {
-    auto solutionType = cmd::getValue(argc, argv, "solutionType");
+    auto solutionType = cmd::getValue(argc, argv, "mode");
     if (!solutionType || *solutionType == "single") {
-        if (!cmd::hasValueInArgs(argc, argv, "useSimpleOpt")) {
-            return createSingleThreadSolution();
-        }
+        return createSingleThreadSolution();
+    }
+    if (solutionType && *solutionType == "single_opt") {
         return createOptimizedSingleThreadSolution();
     }
     return createMultiThreadSolution();    
