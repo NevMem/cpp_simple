@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 
     auto solution = createSolution(argc, argv);
 
-    auto result = threading::dispatcher::computation()->async([](
+    auto result = threading::dispatcher::single()->async([](
             Solution* const solution,
             const std::vector<Item>& items,
             size_t capacity) -> Result {
