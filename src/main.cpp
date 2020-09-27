@@ -9,12 +9,15 @@
 
 #include "solution.h"
 
-std::unique_ptr<Solution> createSolution()
+std::unique_ptr<Solution> createSolution(int argc, char** argv)
 {
-    return createSingleThreadSolution();
+    if (argc <= 1 || (argc >= 2 && argv[0] == "single")) {
+        return createSingleThreadSolution();
+    }
+    return createMultiThreadSolution();    
 }
 
-int main() {
+int main(int argc, char** argv) {
     threading::dispatcher::initializeDispatchers();
 
     size_t count = 0, capacity = 0;
@@ -28,7 +31,7 @@ int main() {
         items.push_back({ cost, size });
     }
 
-    auto solution = createSolution();
+    auto solution = createSolution(argc, argv);
 
     auto result = threading::dispatcher::computation()->async([](
             Solution* const solution,

@@ -7,7 +7,9 @@ def make():
     proc.wait()
 
     proc = sp.Popen(["make"], stdout=sp.PIPE)
-    proc.wait()
+    result = proc.wait()
+    if result != 0:
+        sys.exit(1)
 
 def read_file(file):
     with open(file, 'r') as inp:
