@@ -50,8 +50,8 @@ def runSmallTests(runs=5, runParams=[]):
     whole_delta = 0
 
     for (input_file, output_file) in zip(input_files, output_files):
-        if input_file != '40.in':
-            continue
+        # if input_file != '40.in':
+        #     continue
         args = ["./result.o"]
         for param in runParams:
             args.append(param)
@@ -89,7 +89,7 @@ def runLargeTests():
 
 def main():
     make()
-    runs = 1
+    runs = 10
     runTime, oks = runSmallTests(runs)
     print(runTime, oks)
 

@@ -7,17 +7,17 @@ namespace {
 double calculateUpperBound(
     const std::vector<Item>& items,
     size_t capacity,
-    size_t minUnusedIndex,
-    size_t currentCapacity,
-    double startBound)
+    const Result& current,
+    size_t minUnusedIndex)
 {
-    size_t remainingCap = capacity - currentCapacity;
+    double upperBound = current.cost;
+    size_t remainingCap = capacity - current.capacity;
     for (size_t i = minUnusedIndex; i != items.size() && remainingCap != 0; ++i) {
         size_t capNow = std::min(static_cast<uint32_t>(remainingCap), items[i].size);
-        startBound += capNow * (static_cast<double>(items[i].cost) / items[i].size);
+        upperBound += capNow * (static_cast<double>(items[i].cost) / items[i].size);
         remainingCap -= capNow;
     }
-    return startBound;
+    return upperBound;
 }
 
 class OptimizedSingleThreadSolution : public Solution {
@@ -41,13 +41,7 @@ public:
     }
 
 private:
-    struct InternalResult {
-        uint32_t cost;
-        uint32_t capacity;
-        std::vector<unsigned int> indices;
-    };
-
-    inline Result toResult(const InternalResult& result, const std::vector<size_t>& permutation)
+    inline Result toResult(const Result& result, const std::vector<size_t>& permutation)
     {
         std::unordered_map<size_t, size_t> backPermutation;
         for (size_t i = 0; i != permutation.size(); ++i) {
@@ -66,38 +60,27 @@ private:
             currentBest_ = current_;
         }
 
-        size_t index = items.size();
-        double maxBound = 0;
-        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
-            if (current_.capacity + items[i].size <= capacity) {
-                double upperBound = calculateUpperBound(
-                    items,
-                    capacity,
-                    i + 1,
-                    current_.capacity + items[i].size,
-                    current_.cost + items[i].cost);
-                if (upperBound > maxBound) {
-                    maxBound = upperBound;
-                    index = i;
-                }
-            }
-        }
-        if (index == items.size()) {
+        if (calculateUpperBound(items, capacity, current_, minUnusedIndex) < currentBest_.cost) {
             return;
         }
-        current_.capacity += items[index].size;
-        current_.cost += items[index].cost;
-        current_.indices.push_back(index);
 
-        run(items, capacity, index + 1);
+        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
+            if (current_.capacity + items[i].size <= capacity) {
+                current_.capacity += items[i].size;
+                current_.cost += items[i].cost;
+                current_.indices.insert(i);
 
-        current_.indices.pop_back();
-        current_.capacity -= items[index].size;
-        current_.cost -= items[index].cost;
+                run(items, capacity, i + 1);
+
+                current_.indices.erase(i);
+                current_.capacity -= items[i].size;
+                current_.cost -= items[i].cost;
+            }
+        }
     }
 
-    InternalResult currentBest_ = InternalResult { 0, 0, {} };
-    InternalResult current_ = InternalResult { 0, 0, {} }; // Used while running
+    Result currentBest_ = Result { 0, 0, {} };
+    Result current_ = Result { 0, 0, {} }; // Used while running
 };
 
 }
