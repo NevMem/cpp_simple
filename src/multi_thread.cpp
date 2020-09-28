@@ -163,7 +163,6 @@ private:
         {
             std::lock_guard<std::mutex> guard(bestResultMutex_);
             if (currentBest_.cost < current.cost) {
-                std::cout << "Update best result" << std::endl;
                 currentBest_ = current;
             }
         }
