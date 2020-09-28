@@ -1,6 +1,7 @@
 #include "solution.h"
 
 #include <unordered_map>
+#include <mutex>
 
 #include <threading/dispatcher/dispatchers.h>
 
@@ -17,6 +18,11 @@ public:
             data_.push_back(0);
         }
     }
+
+    Bitset(const Bitset& other)
+    : size_(other.size_)
+    , data_(other.data_)
+    {}
 
     Bitset(Bitset&& other)
     : size_(std::move(other.size_))
@@ -74,6 +80,23 @@ private:
     std::vector<uint64_t> data_;
 };
 
+class MultiWaitFuture {
+public:
+    MultiWaitFuture(std::vector<std::future<std::future<void>>>&& futures)
+    : futures_(std::forward<std::vector<std::future<std::future<void>>>>(futures))
+    {}
+
+    void wait()
+    {
+        for (auto& future: futures_) {
+            future.get().get();
+        }
+    }
+
+private:
+    std::vector<std::future<std::future<void>>> futures_;
+};
+
 double calculateUpperBound(
     const std::vector<Item>& items,
     size_t capacity,
@@ -110,8 +133,8 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
-        current_.used = Bitset(items.size());
-        run(sortedItems, capacity);
+        run(InternalResult { 0, 0, Bitset(items.size()) }, sortedItems, capacity);
+        while (threading::dispatcher::computation()->hasTasks());
         return toResult(currentBest_, permutation);
     }
 
@@ -135,48 +158,42 @@ private:
         return Result { result.cost, result.capacity, res };
     }
 
-    void run(const std::vector<Item>& items, size_t capacity, size_t minUnusedIndex = 0)
+    void run(InternalResult current, const std::vector<Item>& items, size_t capacity, size_t minUnusedIndex = 0)
     {
-        if (currentBest_.cost < current_.cost) {
-            currentBest_ = current_;
-        }
-
-        std::vector<std::future<size_t>> validation;
-
-        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
-            if (current_.capacity + items[i].size <= capacity) {
-                validation.push_back(threading::dispatcher::computation()->async([this, capacity](size_t i, const std::vector<Item>& items) -> size_t {
-                    if (calculateUpperBound(
-                        items,
-                        capacity,
-                        current_.capacity + items[i].size,
-                        current_.cost + items[i].cost,
-                        i + 1) >= currentBest_.cost) {
-                        return i;
-                    } else {
-                        return -1;
-                    }
-                }, i, std::cref(items)));
+        {
+            std::lock_guard<std::mutex> guard(bestResultMutex_);
+            // std::cerr << std::this_thread::get_id() << std::endl;
+            if (currentBest_.cost < current.cost) {
+                currentBest_ = current;
             }
         }
 
-        for (auto& future : validation) {
-            const auto index = future.get();
-            if (index == -1) continue;
-            current_.capacity += items[index].size;
-            current_.cost += items[index].cost;
-            current_.used.set(index, true);
+        if (calculateUpperBound(items, capacity, current.capacity, current.cost, minUnusedIndex) <= currentBest_.cost) {
+            return;
+        }
 
-            run(items, capacity, index + 1);
+        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
+            if (current.capacity + items[i].size > capacity) {
+                continue;
+            }
+            const auto index = i;
 
-            current_.used.set(index, false);
-            current_.capacity -= items[index].size;
-            current_.cost -= items[index].cost;
+            auto newResult = InternalResult { current.cost + items[index].cost, current.capacity + items[index].size, current.used };
+            newResult.used.set(index, true);
+
+            std::lock_guard<std::mutex> guard(waitsMutex_);
+            threading::dispatcher::computation()->async([this](
+                    InternalResult&& newResult, const std::vector<Item>& items, size_t capacity, size_t index) {
+                run(std::move(newResult), items, capacity, index + 1);
+            }, std::move(newResult), std::cref(items), capacity, index);
         }
     }
 
     InternalResult currentBest_ = InternalResult { 0, 0, Bitset(0) };
-    InternalResult current_ = InternalResult { 0, 0, Bitset(0) };
+    std::mutex bestResultMutex_;
+
+    std::vector<std::future<void>> waits_;
+    std::mutex waitsMutex_;
 };
 
 }

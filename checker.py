@@ -91,7 +91,7 @@ def runLargeTests(runParams=[]):
 
 def main():
     make()
-    runs = 10
+    runs = 5
 
     runTime, oks = runSmallTests(runs, ["mode=single_opt"])
     print(runTime, oks)
