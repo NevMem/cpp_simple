@@ -80,23 +80,6 @@ private:
     std::vector<uint64_t> data_;
 };
 
-class MultiWaitFuture {
-public:
-    MultiWaitFuture(std::vector<std::future<std::future<void>>>&& futures)
-    : futures_(std::forward<std::vector<std::future<std::future<void>>>>(futures))
-    {}
-
-    void wait()
-    {
-        for (auto& future: futures_) {
-            future.get().get();
-        }
-    }
-
-private:
-    std::vector<std::future<std::future<void>>> futures_;
-};
-
 double calculateUpperBound(
     const std::vector<Item>& items,
     size_t capacity,
