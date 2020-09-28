@@ -45,8 +45,6 @@ std::unique_ptr<Solution> createSolution(int argc, char** argv)
 }
 
 int main(int argc, char** argv) {
-    threading::dispatcher::initializeDispatchers();
-
     size_t count = 0, capacity = 0;
     std::cin >> count >> capacity;
     std::vector<Item> items;
