@@ -162,18 +162,22 @@ private:
     {
         {
             std::lock_guard<std::mutex> guard(bestResultMutex_);
-            // std::cerr << std::this_thread::get_id() << std::endl;
             if (currentBest_.cost < current.cost) {
+                std::cout << "Update best result" << std::endl;
                 currentBest_ = current;
             }
         }
 
-        if (calculateUpperBound(items, capacity, current.capacity, current.cost, minUnusedIndex) <= currentBest_.cost) {
-            return;
-        }
-
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current.capacity + items[i].size > capacity) {
+                continue;
+            }
+            if (calculateUpperBound(
+                    items,
+                    capacity,
+                    current.capacity + items[i].size,
+                    current.cost + items[i].cost,
+                    i + 1) <= currentBest_.cost) {
                 continue;
             }
             const auto index = i;
@@ -181,19 +185,15 @@ private:
             auto newResult = InternalResult { current.cost + items[index].cost, current.capacity + items[index].size, current.used };
             newResult.used.set(index, true);
 
-            std::lock_guard<std::mutex> guard(waitsMutex_);
-            threading::dispatcher::computation()->async([this](
-                    InternalResult&& newResult, const std::vector<Item>& items, size_t capacity, size_t index) {
-                run(std::move(newResult), items, capacity, index + 1);
-            }, std::move(newResult), std::cref(items), capacity, index);
+            // threading::dispatcher::computation()->async([this](
+            //         InternalResult&& newResult, const std::vector<Item>& items, size_t capacity, size_t index) {
+                run(std::forward<InternalResult>(newResult), items, capacity, index + 1);
+            // }, std::move(newResult), std::cref(items), capacity, index);
         }
     }
 
     InternalResult currentBest_ = InternalResult { 0, 0, Bitset(0) };
     std::mutex bestResultMutex_;
-
-    std::vector<std::future<void>> waits_;
-    std::mutex waitsMutex_;
 };
 
 }
