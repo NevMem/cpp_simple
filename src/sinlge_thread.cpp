@@ -45,19 +45,19 @@ private:
         return Result { result.cost, result.capacity, res };
     }
 
-    void run(const std::vector<Item>& items, size_t capacity, size_t minUnusedIndex = 0)
+    void run(const std::vector<Item>& items, size_t capacity)
     {
         if (currentBest_.cost < current_.cost) {
             currentBest_ = current_;
         }
 
-        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
-            if (current_.capacity + items[i].size <= capacity) {
+        for (size_t i = 0; i != items.size(); ++i) {
+            if (current_.capacity + items[i].size <= capacity && current_.indices.find(i) == current_.indices.end()) {
                 current_.capacity += items[i].size;
                 current_.cost += items[i].cost;
                 current_.indices.insert(i);
 
-                run(items, capacity, i + 1);
+                run(items, capacity);
 
                 current_.indices.erase(i);
                 current_.capacity -= items[i].size;

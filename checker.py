@@ -93,6 +93,9 @@ def main():
     make()
     runs = 5
 
+    runTime, oks = runSmallTests(runs, ["mode=single"])
+    print(runTime, oks)
+
     runTime, oks = runSmallTests(runs, ["mode=single_opt"])
     print(runTime, oks)
 
