@@ -285,32 +285,32 @@ src/optimized_single_thread.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/optimized_single_thread.cpp.s
 .PHONY : src/optimized_single_thread.cpp.s
 
-src/sinlge_thread.o: src/sinlge_thread.cpp.o
+src/single_thread.o: src/single_thread.cpp.o
 
-.PHONY : src/sinlge_thread.o
+.PHONY : src/single_thread.o
 
 # target to build an object file
-src/sinlge_thread.cpp.o:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.o
-.PHONY : src/sinlge_thread.cpp.o
+src/single_thread.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/single_thread.cpp.o
+.PHONY : src/single_thread.cpp.o
 
-src/sinlge_thread.i: src/sinlge_thread.cpp.i
+src/single_thread.i: src/single_thread.cpp.i
 
-.PHONY : src/sinlge_thread.i
+.PHONY : src/single_thread.i
 
 # target to preprocess a source file
-src/sinlge_thread.cpp.i:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.i
-.PHONY : src/sinlge_thread.cpp.i
+src/single_thread.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/single_thread.cpp.i
+.PHONY : src/single_thread.cpp.i
 
-src/sinlge_thread.s: src/sinlge_thread.cpp.s
+src/single_thread.s: src/single_thread.cpp.s
 
-.PHONY : src/sinlge_thread.s
+.PHONY : src/single_thread.s
 
 # target to generate assembly for a file
-src/sinlge_thread.cpp.s:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/sinlge_thread.cpp.s
-.PHONY : src/sinlge_thread.cpp.s
+src/single_thread.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/single_thread.cpp.s
+.PHONY : src/single_thread.cpp.s
 
 # Help Target
 help:
@@ -339,9 +339,9 @@ help:
 	@echo "... src/optimized_single_thread.o"
 	@echo "... src/optimized_single_thread.i"
 	@echo "... src/optimized_single_thread.s"
-	@echo "... src/sinlge_thread.o"
-	@echo "... src/sinlge_thread.i"
-	@echo "... src/sinlge_thread.s"
+	@echo "... src/single_thread.o"
+	@echo "... src/single_thread.i"
+	@echo "... src/single_thread.s"
 .PHONY : help
 
 
