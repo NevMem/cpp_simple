@@ -105,7 +105,7 @@ def runLargeTests(runParams=[]):
         start = time.time()
         proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
-            proc.wait(10)
+            proc.wait(200)
             print("Done", time.time() - start)
         except:
             print("Timeout")
@@ -124,8 +124,8 @@ def main():
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
 
-    # runLargeTests(["mode=single"])
-    # runLargeTests(["mode=multi"])
+    runLargeTests(["mode=single"])
+    runLargeTests(["mode=multi"])
 
 if __name__ == '__main__':
     main()
