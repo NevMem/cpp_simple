@@ -122,6 +122,7 @@ public:
             sortedItems[permutation[i]] = items[i];
         }
         run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
+        while (threading::dispatcher::computation()->hasTasks());
         return toResult(currentBest_, permutation);
     }
 
@@ -148,14 +149,13 @@ private:
             }
         }
 
-        std::vector<std::future<int>> futures;
         for (size_t i = 0; i != items.size(); ++i) {
             if (current.capacity + items[i].size > capacity
                     || current.included.find(i) != current.included.end()
                     || current.excluded.find(i) != current.excluded.end()) {
                 continue;
             }
-            futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
+            threading::dispatcher::computation()->async([this, items, capacity, current](size_t index) {
                 InternalResult copy = current;
                 copy.included.insert(index);
                 copy.cost += items[index].cost;
@@ -163,46 +163,30 @@ private:
                 if (calculateUpperBound(
                         items,
                         capacity,
-                        copy) >= currentBest_.cost) {
-                    return static_cast<int>(index) + 1;
-                } else {
-                    return 0;
+                        copy) >= currentBestCost()) {
+                    run(copy, items, capacity);
                 }
-            }, i));
-            futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
+            }, i);
+            threading::dispatcher::computation()->async([this, items, capacity, current](size_t index) {
                 InternalResult copy = current;
                 copy.excluded.insert(index);
                 if (calculateUpperBound(
                         items,
                         capacity,
-                        copy) >= currentBest_.cost) {
-                    return -static_cast<int>(index) - 1;
-                } else {
-                    return 0;
+                        copy) >= currentBestCost()) {
+                    run(copy, items, capacity);
                 }
-            }, i));
-        }
-
-        for (auto& future : futures) {
-            const auto value = future.get();
-            if (value == 0) {
-                continue;
-            }
-            auto copy = current;
-            if (value > 0) {
-                copy.included.insert(value - 1);
-                copy.capacity += items[value - 1].size;
-                copy.cost += items[value - 1].cost;
-                run(copy, items, capacity);
-                continue;
-            }
-            copy.excluded.insert(-value - 1);
-            run(copy, items, capacity);
+            }, i);
         }
     }
 
+    uint32_t currentBestCost() const {
+        std::lock_guard<std::mutex> guard(bestResultMutex_);
+        return currentBest_.cost;
+    }
+
     InternalResult currentBest_ = InternalResult { 0, 0, {}, {} };
-    std::mutex bestResultMutex_;
+    mutable std::mutex bestResultMutex_;
 };
 
 }
