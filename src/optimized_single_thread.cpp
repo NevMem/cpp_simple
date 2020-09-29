@@ -41,11 +41,11 @@ public:
     }
 
 private:
-    inline Result toResult(const Result& result, const std::vector<size_t>& permutation) const
+    inline Result toResult(const Result& result, const std::vector<size_t>& permutation)
     {
         std::unordered_map<size_t, size_t> backPermutation;
         for (size_t i = 0; i != permutation.size(); ++i) {
-            backPermutation[i] = permutation[i];
+            backPermutation[permutation[i]] = i;
         }
         std::set<unsigned int> res;
         for (const auto& value : result.indices) {

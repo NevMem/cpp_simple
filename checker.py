@@ -4,10 +4,10 @@ import subprocess as sp
 import time
 
 def make():
-    proc = sp.Popen(["cmake", "."], stdout=sp.PIPE)
+    proc = sp.Popen(["cmake", "."])
     proc.wait()
 
-    proc = sp.Popen(["make"], stdout=sp.PIPE)
+    proc = sp.Popen(["make"])
     result = proc.wait()
     if result != 0:
         sys.exit(1)
@@ -18,15 +18,37 @@ def read_file(file):
         output_parts = sorted(list(map(int, inp.readline().split())))
         return output_answer, output_parts
 
-def check(output_file, real_file):
+def check(output_file, real_file, input_file):
     output_answer, output_parts = read_file(output_file)
     real_answer, real_parts = read_file(real_file)
-    if output_answer == real_answer and output_parts == real_parts:
+    
+    validation = True
+    reason = ""
+
+    with open(input_file, 'r') as inp:
+        n, capacity = list(map(int, inp.readline().split()))
+        k_cost, k_size = 0, 0
+        for i in range(n):
+            cost, size = list(map(int, inp.readline().split()))
+            if i + 1 in output_parts:
+                k_cost += cost
+                k_size += size
+        if k_size > capacity:
+            validation = False
+            reason = "overflow "
+        if k_cost != output_answer:
+            validation = False
+            reason += "no proof " + str(k_cost) + " " + str(output_answer)
+    
+    if output_answer == real_answer and output_parts == real_parts and validation:
         # print("ok")
         return True
     else:
+        if not validation:
+            print("Validation failed", reason, input_file)
+            return False
         if output_answer != real_answer:
-            print("Answers doesn't match, found:", output_answer, "expected:", real_answer)
+            print("Answers doesn't match, found:", output_answer, "expected:", real_answer, input_file)
             print(output_parts, real_parts)
         else:
             # print('Parts doesn`t match')
@@ -62,7 +84,7 @@ def runSmallTests(runs=5, runParams=[]):
         delta /= runs
         whole_delta += delta
 
-        if check("output.txt", test_dir + "/" + output_file):
+        if check("output.txt", test_dir + "/" + output_file, test_dir + "/" + input_file):
             oks += 1
     return (whole_delta, (oks * 1.0) / len(input_files))
 
@@ -91,7 +113,7 @@ def runLargeTests(runParams=[]):
 
 def main():
     make()
-    runs = 5
+    runs = 1
 
     runTime, oks = runSmallTests(runs, ["mode=single"])
     print(runTime, oks)
@@ -102,8 +124,8 @@ def main():
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
 
-    runLargeTests(["mode=single_opt"])
-    runLargeTests(["mode=multi"])
+    # runLargeTests(["mode=single"])
+    # runLargeTests(["mode=multi"])
 
 if __name__ == '__main__':
     main()

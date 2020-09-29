@@ -95,6 +95,8 @@ private:
 
 class Dispatcher {
 public:
+    virtual ~Dispatcher() = default;
+
     template<typename F, typename... Args>
     void spawn(F&& func, Args&&... args) {
         auto pack = std::unique_ptr<Pack<typename std::decay<typename std::result_of<F(Args...)>::type>::type, Args...>>(new Pack<typename std::decay<typename std::result_of<F(Args...)>::type>::type, Args...>(

@@ -22,8 +22,8 @@ double calculateUpperBound(const std::vector<Item>& items, size_t capacity, cons
     for (size_t i = 0; i != items.size(); ++i) {
         if (result.included.find(i) == result.included.end()
                 && result.excluded.find(i) == result.excluded.end()) {
-            size_t currentCap = std::min(remCap, static_cast<size_t>(result.capacity));
-            upperBound += currentCap * (static_cast<double>(result.cost) / result.capacity);
+            size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
+            upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
             remCap -= currentCap;
         }
     }
@@ -49,7 +49,7 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
-        run(sortedItems, capacity);
+        run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
         return toResult(currentBest_, permutation);
     }
 
@@ -58,7 +58,7 @@ private:
     {
         std::unordered_map<size_t, size_t> backPermutation;
         for (size_t i = 0; i != permutation.size(); ++i) {
-            backPermutation[i] = permutation[i];
+            backPermutation[permutation[i]] = i;
         }
         std::set<unsigned int> res;
         for (const auto& value : result.included) {
@@ -67,40 +67,52 @@ private:
         return Result { result.cost, result.capacity, res };
     }
 
-    void run(const std::vector<Item>& items, size_t capacity)
+    void run(InternalResult current, const std::vector<Item>& items, size_t capacity)
     {
-        if (currentBest_.cost < current_.cost) {
-            currentBest_ = current_;
+        if (currentBest_.cost < current.cost) {
+            currentBest_ = current;
         }
 
-        if (calculateUpperBound(items, capacity, current_) <= currentBest_.cost) {
-            return;
-        }
-
+        std::vector<int> values;
         for (size_t i = 0; i != items.size(); ++i) {
-            if (current_.capacity + items[i].size <= capacity
-                    && current_.included.find(i) == current_.included.end()
-                    && current_.excluded.find(i) == current_.excluded.end()) {
-                current_.capacity += items[i].size;
-                current_.cost += items[i].cost;
-                current_.included.insert(i);
-
-                run(items, capacity);
-
-                current_.included.erase(i);
-                current_.capacity -= items[i].size;
-                current_.cost -= items[i].cost;
+            if (current.included.find(i) != current.included.end() || current.excluded.find(i) != current.excluded.end()) {
+                continue;
             }
-            if (current_.excluded.find(i) == current_.excluded.end() && current_.included.find(i) == current_.included.end()){
-                current_.excluded.insert(i);
-                run(items, capacity);
-                current_.excluded.erase(i);
+            if (current.capacity + items[i].size <= capacity) {
+                const auto index = i;
+                InternalResult copy = current;
+                copy.included.insert(index);
+                copy.cost += items[index].cost;
+                copy.capacity += items[index].size;
+                if (calculateUpperBound(items, capacity, copy) >= currentBest_.cost) {
+                    values.push_back((int)index + 1);
+                }
             }
+            {
+                const auto index = i;
+                InternalResult copy = current;
+                copy.excluded.insert(index);
+                if (calculateUpperBound(items, capacity, copy) >= currentBest_.cost) {
+                    values.push_back(-(int)index - 1);
+                }
+            }
+        }
+
+        for (const auto& value : values) {
+            auto copy = current;
+            if (value > 0) {
+                copy.included.insert(value - 1);
+                copy.capacity += items[value - 1].size;
+                copy.cost += items[value - 1].cost;
+                run(copy, items, capacity);
+                continue;
+            }
+            copy.excluded.insert(-value - 1);
+            run(copy, items, capacity);
         }
     }
 
     InternalResult currentBest_ = InternalResult { 0, 0, {}, {} };
-    InternalResult current_ = InternalResult { 0, 0, {}, {} }; // Used while running
 };
 
 }

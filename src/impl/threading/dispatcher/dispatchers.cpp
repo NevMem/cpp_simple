@@ -16,8 +16,39 @@ namespace threading::dispatcher {
 
 namespace {
 
+#ifdef DISPATCHER_EXTENSIONS
+#undef DISPATCHER_EXTENSIONS
+#endif
+
 #ifdef DISPATCHER_LOGGING
+#define DISPATCHER_EXTENSIONS
+#endif
+
+#ifdef DISPATCHER_PROFILING
+#define DISPATCHER_EXTENSIONS
+#endif
+
+#ifdef DISPATCHER_EXTENSIONS
 std::mutex cerrMutex_;
+#endif
+
+inline void log(const std::string& tag, const std::string& message)
+{
+#ifdef DISPATCHER_LOGGING
+    std::lock_guard<std::mutex> guard(cerrMutex_);
+    std::cerr << "[" << tag << "] " << message << std::endl;
+#endif
+}
+
+inline void logProfile(const std::string& message)
+{
+#ifdef DISPATCHER_PROFILING
+    std::lock_guard<std::mutex> guard(cerrMutex_);
+    std::cerr << "<profile> " << message << std::endl;
+#endif
+}
+
+#ifdef DISPATCHER_EXTENSIONS
 
 class PackWrapper {
 public:
@@ -41,26 +72,17 @@ public:
         return static_cast<bool>(pack_);
     }
 
-    unsigned long long timeSinceCreation() const
+    auto timeSinceCreation() const
     {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now() - packCreated_).count();
+        const auto diff = std::chrono::high_resolution_clock::now() - packCreated_;
+        return std::chrono::duration<long long, std::nano>(diff);
     }
 
 private:
     const std::unique_ptr<BasePack> pack_;
     const std::chrono::time_point<std::chrono::high_resolution_clock> packCreated_;
 };
-
 #endif
-
-inline void log(const std::string& tag, const std::string& message)
-{
-#ifdef DISPATCHER_LOGGING
-    std::lock_guard<std::mutex> guard(cerrMutex_);
-    std::cerr << "[" << tag << "] " << message << std::endl;
-#endif
-}
 
 class UnstableDispatcher : public Dispatcher {
 public:
@@ -163,7 +185,7 @@ protected:
         {
             log("dispatch", "Adding pack");
             std::lock_guard<std::mutex> guard(mutex_);
-#ifdef DISPATCHER_LOGGING
+#ifdef DISPATCHER_EXTENSIONS
             queue_.push(std::make_unique<PackWrapper>(
                 std::forward<std::unique_ptr<BasePack>>(pack)));
             log("queue", "Tasks count: " + std::to_string(queue_.size()));
@@ -176,7 +198,7 @@ protected:
     }
 
 private:
-#ifdef DISPATCHER_LOGGING
+#ifdef DISPATCHER_EXTENSIONS
     typedef std::unique_ptr<PackWrapper> QueuePackType;
 #else
     typedef std::unique_ptr<BasePack> QueuePackType;
@@ -195,8 +217,9 @@ private:
                     busyThreads_ += 1;
                 }
                 if (pack) {
-#ifdef DISPATCHER_LOGGING
-                    log("run", "Executing pack from queue (time in queue: " + std::to_string(pack->timeSinceCreation()) + " ms)");
+#ifdef DISPATCHER_EXTENSIONS
+                    log("run", "Executing pack from queue (time in queue: " + std::to_string(pack->timeSinceCreation().count()) + " ns)");
+                    totalInQueueTime_ += pack->timeSinceCreation();
 #endif
                     (*pack)();
                     log("run", "Done");
@@ -204,6 +227,12 @@ private:
                         std::lock_guard<std::mutex> guard(mutex_);
                         busyThreads_ -= 1;
                     }
+#ifdef DISPATCHER_PROFILING
+                    {
+                        std::lock_guard<std::mutex> guard(profilingMutex_);
+                        dispatchedPacks_ += 1;
+                    }
+#endif
                 }
             }
         });
@@ -217,10 +246,33 @@ private:
             threads_.push_back(makeThread());
         }
         log("init", "Initialized " + std::to_string(T) + " threads");
+
+#ifdef DISPATCHER_PROFILING
+        profilingThread_ = std::thread([this]() {
+            while (true) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                profile();
+            }
+        });
+#endif
     }
 
-#ifdef DISPATCHER_LOGGING
+#ifdef DISPATCHER_PROFILING
+    void profile() const {
+        logProfile("Dispatched " + std::to_string(dispatchedPacks_)
+            + ", total time in queue: " + std::to_string(totalInQueueTime_.count())
+            + ", average latency: " + std::to_string(totalInQueueTime_.count() / dispatchedPacks_));
+    }
+
+    std::thread profilingThread_;
+
+    mutable std::mutex profilingMutex_;
+#endif
+
+#ifdef DISPATCHER_EXTENSIONS
     std::queue<QueuePackType> queue_;
+    std::chrono::duration<long long, std::nano> totalInQueueTime_ = std::chrono::duration<long long, std::nano>(0);
+    size_t dispatchedPacks_;
 #else
     std::queue<QueuePackType> queue_;
 #endif
