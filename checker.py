@@ -125,7 +125,7 @@ def main():
     print(runTime, oks)
 
     # runLargeTests(["mode=single"])
-    # runLargeTests(["mode=multi"])
+    runLargeTests(["mode=multi"])
 
 if __name__ == '__main__':
     main()
