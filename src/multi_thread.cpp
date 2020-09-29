@@ -122,7 +122,6 @@ public:
             sortedItems[permutation[i]] = items[i];
         }
         run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
-        while (threading::dispatcher::computation()->hasTasks());
         return toResult(currentBest_, permutation);
     }
 
