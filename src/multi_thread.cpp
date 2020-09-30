@@ -46,16 +46,16 @@ public:
     bool get(size_t index) const
     {
         const auto block = index / 64;
-        return (data_[block] & (1ull << (block % 64))) != 0;
+        return (data_[block] & (1ull << (index % 64))) != 0;
     }
 
     void set(size_t index, bool value)
     {
         const auto block = index / 64;
         if (value) {
-            data_[block] |= (1ull << (block % 64));
+            data_[block] |= (1ull << (index % 64));
         } else {
-            data_[block] &= ~(1ull << (block % 64));
+            data_[block] &= ~(1ull << (index % 64));
         }
     }
 
