@@ -46,16 +46,16 @@ public:
     bool get(size_t index) const
     {
         const auto block = index / 64;
-        return (data_[block] & (1ull << (index % 64))) != 0;
+        return (data_[block] & (1ull << (block % 64))) != 0;
     }
 
     void set(size_t index, bool value)
     {
         const auto block = index / 64;
         if (value) {
-            data_[block] |= (1ull << (index % 64));
+            data_[block] |= (1ull << (block % 64));
         } else {
-            data_[block] &= ~(1ull << (index % 64));
+            data_[block] &= ~(1ull << (block % 64));
         }
     }
 
@@ -83,16 +83,17 @@ private:
 struct InternalResult {
     uint32_t cost;
     uint32_t capacity;
-    Bitset included;
-    Bitset excluded;
+    std::set<size_t> included;
+    std::set<size_t> excluded;
 };
     
-double calculateUpperBound(const InternalResult& result, const std::vector<Item>& items, size_t capacity)
+double calculateUpperBound(const std::vector<Item>& items, size_t capacity, const InternalResult& result)
 {
     size_t remCap = capacity - result.capacity;
     double upperBound = result.cost;
     for (size_t i = 0; i != items.size(); ++i) {
-        if (!result.included.get(i) && !result.excluded.get(i)) {
+        if (result.included.find(i) == result.included.end()
+                && result.excluded.find(i) == result.excluded.end()) {
             size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
             upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
             remCap -= currentCap;
@@ -120,7 +121,7 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
-        run(InternalResult { 0, 0, Bitset(items.size()), Bitset(items.size()) }, sortedItems, capacity);
+        run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
         while (threading::dispatcher::computation()->hasTasks());
         return toResult(currentBest_, permutation);
     }
@@ -133,7 +134,7 @@ private:
             backPermutation[permutation[i]] = i;
         }
         std::set<unsigned int> res;
-        for (const auto& value : result.included.asVector()) {
+        for (const auto& value : result.included) {
             res.insert(backPermutation[value]);
         }
         return Result { result.cost, result.capacity, res };
@@ -149,24 +150,30 @@ private:
         }
 
         for (size_t i = 0; i != items.size(); ++i) {
-            if (current.included.get(i) || current.excluded.get(i)) {
+            if (current.capacity + items[i].size > capacity
+                    || current.included.find(i) != current.included.end()
+                    || current.excluded.find(i) != current.excluded.end()) {
                 continue;
-            }
-            if (current.capacity + items[i].size <= capacity) {
-                threading::dispatcher::computation()->async([this, items, capacity, current](size_t index) {
-                    InternalResult copy = current;
-                    copy.included.set(index, true);
-                    copy.cost += items[index].cost;
-                    copy.capacity += items[index].size;
-                    if (calculateUpperBound(copy, items, capacity) >= currentBestCost()) {
-                        run(copy, items, capacity);
-                    }
-                }, i);
             }
             threading::dispatcher::computation()->async([this, items, capacity, current](size_t index) {
                 InternalResult copy = current;
-                copy.excluded.set(index, true);
-                if (calculateUpperBound(copy, items, capacity) >= currentBestCost()) {
+                copy.included.insert(index);
+                copy.cost += items[index].cost;
+                copy.capacity += items[index].size;
+                if (calculateUpperBound(
+                        items,
+                        capacity,
+                        copy) >= currentBestCost()) {
+                    run(copy, items, capacity);
+                }
+            }, i);
+            threading::dispatcher::computation()->async([this, items, capacity, current](size_t index) {
+                InternalResult copy = current;
+                copy.excluded.insert(index);
+                if (calculateUpperBound(
+                        items,
+                        capacity,
+                        copy) >= currentBestCost()) {
                     run(copy, items, capacity);
                 }
             }, i);
@@ -178,7 +185,7 @@ private:
         return currentBest_.cost;
     }
 
-    InternalResult currentBest_ = InternalResult { 0, 0, Bitset(0), Bitset(0) };
+    InternalResult currentBest_ = InternalResult { 0, 0, {}, {} };
     mutable std::mutex bestResultMutex_;
 };
 
