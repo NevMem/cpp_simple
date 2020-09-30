@@ -92,8 +92,7 @@ double calculateUpperBound(const std::vector<Item>& items, size_t capacity, cons
     size_t remCap = capacity - result.capacity;
     double upperBound = result.cost;
     for (size_t i = 0; i != items.size(); ++i) {
-        if (result.included.find(i) == result.included.end()
-                && result.excluded.find(i) == result.excluded.end()) {
+        if (result.included.find(i) == result.included.end() && result.excluded.find(i) == result.excluded.end()) {
             size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
             upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
             remCap -= currentCap;
@@ -150,25 +149,25 @@ private:
 
         std::vector<std::future<int>> futures;
         for (size_t i = 0; i != items.size(); ++i) {
-            if (current.capacity + items[i].size > capacity
-                    || current.included.find(i) != current.included.end()
-                    || current.excluded.find(i) != current.excluded.end()) {
+            if (current.included.find(i) != current.included.end() || current.excluded.find(i) != current.excluded.end()) {
                 continue;
             }
-            futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
-                InternalResult copy = current;
-                copy.included.insert(index);
-                copy.cost += items[index].cost;
-                copy.capacity += items[index].size;
-                if (calculateUpperBound(
-                        items,
-                        capacity,
-                        copy) >= currentBest_.cost) {
-                    return static_cast<int>(index) + 1;
-                } else {
-                    return 0;
-                }
-            }, i));
+            if (current.capacity + items[i].size <= capacity) {
+                futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
+                    InternalResult copy = current;
+                    copy.included.insert(index);
+                    copy.cost += items[index].cost;
+                    copy.capacity += items[index].size;
+                    if (calculateUpperBound(
+                            items,
+                            capacity,
+                            copy) >= currentBest_.cost) {
+                        return static_cast<int>(index) + 1;
+                    } else {
+                        return 0;
+                    }
+                }, i));
+            }
             futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
                 InternalResult copy = current;
                 copy.excluded.insert(index);
