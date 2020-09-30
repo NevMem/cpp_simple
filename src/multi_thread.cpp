@@ -83,8 +83,8 @@ private:
 struct InternalResult {
     uint32_t cost;
     uint32_t capacity;
-    std::set<size_t> included;
-    std::set<size_t> excluded;
+    Bitset included;
+    Bitset excluded;
 };
     
 double calculateUpperBound(const std::vector<Item>& items, size_t capacity, const InternalResult& result)
@@ -92,8 +92,7 @@ double calculateUpperBound(const std::vector<Item>& items, size_t capacity, cons
     size_t remCap = capacity - result.capacity;
     double upperBound = result.cost;
     for (size_t i = 0; i != items.size(); ++i) {
-        if (result.included.find(i) == result.included.end()
-                && result.excluded.find(i) == result.excluded.end()) {
+        if (!result.included.get(i) && !result.excluded.get(i)) {
             size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
             upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
             remCap -= currentCap;
@@ -121,7 +120,7 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
-        run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
+        run(InternalResult { 0, 0, Bitset(items.size()), Bitset(items.size()) }, sortedItems, capacity);
         return toResult(currentBest_, permutation);
     }
 
@@ -133,7 +132,7 @@ private:
             backPermutation[permutation[i]] = i;
         }
         std::set<unsigned int> res;
-        for (const auto& value : result.included) {
+        for (const auto& value : result.included.asVector()) {
             res.insert(backPermutation[value]);
         }
         return Result { result.cost, result.capacity, res };
@@ -150,28 +149,28 @@ private:
 
         std::vector<std::future<int>> futures;
         for (size_t i = 0; i != items.size(); ++i) {
-            if (current.capacity + items[i].size > capacity
-                    || current.included.find(i) != current.included.end()
-                    || current.excluded.find(i) != current.excluded.end()) {
+            if (current.included.get(i) || current.excluded.get(i)) {
                 continue;
+            }
+            if (current.capacity + items[i].size <= capacity) {
+                futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
+                    InternalResult copy = current;
+                    copy.included.set(index, true);
+                    copy.cost += items[index].cost;
+                    copy.capacity += items[index].size;
+                    if (calculateUpperBound(
+                            items,
+                            capacity,
+                            copy) >= currentBest_.cost) {
+                        return static_cast<int>(index) + 1;
+                    } else {
+                        return 0;
+                    }
+                }, i));
             }
             futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
                 InternalResult copy = current;
-                copy.included.insert(index);
-                copy.cost += items[index].cost;
-                copy.capacity += items[index].size;
-                if (calculateUpperBound(
-                        items,
-                        capacity,
-                        copy) >= currentBest_.cost) {
-                    return static_cast<int>(index) + 1;
-                } else {
-                    return 0;
-                }
-            }, i));
-            futures.push_back(threading::dispatcher::computation()->async([this, items, capacity, &current](size_t index) -> int {
-                InternalResult copy = current;
-                copy.excluded.insert(index);
+                copy.excluded.set(index, true);
                 if (calculateUpperBound(
                         items,
                         capacity,
@@ -190,18 +189,18 @@ private:
             }
             auto copy = current;
             if (value > 0) {
-                copy.included.insert(value - 1);
+                copy.included.set(value - 1, true);
                 copy.capacity += items[value - 1].size;
                 copy.cost += items[value - 1].cost;
                 run(copy, items, capacity);
                 continue;
             }
-            copy.excluded.insert(-value - 1);
+            copy.excluded.set(-value - 1, true);
             run(copy, items, capacity);
         }
     }
 
-    InternalResult currentBest_ = InternalResult { 0, 0, {}, {} };
+    InternalResult currentBest_ = InternalResult { 0, 0, Bitset(0), Bitset(0) };
     std::mutex bestResultMutex_;
 };
 
