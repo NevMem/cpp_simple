@@ -1,5 +1,6 @@
 #include "solution.h"
 
+#include <algorithm>
 #include <unordered_map>
 #include <mutex>
 

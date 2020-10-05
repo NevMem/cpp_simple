@@ -1,5 +1,6 @@
 #include "solution.h"
 
+#include <algorithm>
 #include <numeric>
 #include <iostream>
 #include <unordered_map>
