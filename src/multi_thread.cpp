@@ -14,10 +14,10 @@ struct InternalResult {
     std::set<size_t> included;
 };
     
-double calculateUpperBound(const std::vector<Item>& items, size_t capacity, const InternalResult& result, size_t minUnusedIndex)
+double calculateUpperBound(const std::vector<Item>& items, size_t capacity, size_t currentCost, size_t currentCapacity, size_t minUnusedIndex)
 {
-    size_t remCap = capacity - result.capacity;
-    double upperBound = result.cost;
+    size_t remCap = capacity - currentCapacity;
+    double upperBound = currentCost;
     for (size_t i = minUnusedIndex; i != items.size() && remCap != 0; ++i) {
         size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
         upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
@@ -77,10 +77,7 @@ private:
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {
                 if (current_.capacity + items[index].size <= capacity) {
-                    InternalResult copy = InternalResult { current_.cost, current_.capacity, {} };
-                    copy.cost += items[index].cost;
-                    copy.capacity += items[index].size;
-                    const auto upperBound = calculateUpperBound(items, capacity, copy, index + 1);
+                    const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
                     if (upperBound >= currentBest_.cost) {
                         std::lock_guard<std::mutex> guard(writeMutex);
                         values.push_back({ upperBound, index });
