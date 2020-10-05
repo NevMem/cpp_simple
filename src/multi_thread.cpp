@@ -18,7 +18,7 @@ double calculateUpperBound(const std::vector<Item>& items, size_t capacity, size
 {
     size_t remCap = capacity - currentCapacity;
     double upperBound = currentCost;
-    for (size_t i = minUnusedIndex; i != items.size() && remCap != 0; ++i) {
+    for (size_t i = minUnusedIndex; i != items.size(); ++i) {
         size_t currentCap = std::min(remCap, static_cast<size_t>(items[i].size));
         upperBound += currentCap * (static_cast<double>(items[i].cost) / items[i].size);
         remCap -= currentCap;
@@ -65,18 +65,17 @@ private:
 
     void run(const std::vector<Item>& items, size_t capacity, size_t minUnusedIndex)
     {
-        {
-            if (currentBest_.cost < current_.cost) {
-                currentBest_ = current_;
-            }
+        if (currentBest_.cost < current_.cost) {
+            currentBest_ = current_;
         }
 
         std::vector<std::future<void>> futures;
         std::vector<std::pair<double, size_t>> values;
+        values.reserve(items.size() - minUnusedIndex);
         std::mutex writeMutex;
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current_.capacity + items[i].size <= capacity) {
-                futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {        
+                futures.push_back(threading::dispatcher::unstable()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {        
                     const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
                     if (upperBound >= currentBest_.cost) {
                         std::lock_guard<std::mutex> guard(writeMutex);

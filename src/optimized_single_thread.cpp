@@ -13,7 +13,7 @@ double calculateUpperBound(
 {
     double upperBound = current.cost;
     size_t remainingCap = capacity - current.capacity;
-    for (size_t i = minUnusedIndex; i != items.size() && remainingCap != 0; ++i) {
+    for (size_t i = minUnusedIndex; i != items.size(); ++i) {
         size_t capNow = std::min(static_cast<uint32_t>(remainingCap), items[i].size);
         upperBound += capNow * (static_cast<double>(items[i].cost) / items[i].size);
         remainingCap -= capNow;
