@@ -2,6 +2,7 @@ import sys
 import os
 import subprocess as sp
 import time
+import numpy as np
 
 def make():
     proc = sp.Popen(["cmake", "."])
@@ -58,7 +59,7 @@ def check(output_file, real_file, input_file):
    
 
 def runSmallTests(runs=5, runParams=[]):
-    test_dir = '/Users/yaigor/Desktop/lab_1/small_tests'
+    test_dir = '../lab_1/small_tests'
     input_files = []
     output_files = []
     for file in os.listdir(test_dir):
@@ -88,14 +89,35 @@ def runSmallTests(runs=5, runParams=[]):
             oks += 1
     return (whole_delta, (oks * 1.0) / len(input_files))
 
+def scale_test(from_file, to_file, scale):
+    with open(from_file, 'r') as inp:
+        count, capacity = list(map(int, inp.readline().split()))
+        scaled_count = int(count * scale)
+        scaled_capacity = int(capacity * scale)
+        lines = []
+        for i in range(scaled_count):
+            lines.append(inp.readline())
+        with open(to_file, 'w') as out:
+            out.write(str(scaled_count) + " " + str(scaled_capacity) + "\n")
+            for line in lines:
+                out.write(line)
 
-def runLargeTests(runParams=[]):
-    test_dir = '/Users/yaigor/Desktop/lab_1/tests_100'
-    input_files = []
+def runLargeTests(runParams=[], scale=1.0):
+    test_dir = '../lab_1/tests_100'
+
+    pre_input_files = []
     for file in os.listdir(test_dir):
         if os.path.isfile(test_dir + '/' + file):
-            if file[-3:] == '.in':
-                input_files.append(file)
+            if file[-3:] == '.in' and file.find("100") != -1:
+                pre_input_files.append(file)
+    
+    input_files = []
+    for file in pre_input_files:
+        input_files.append('/scaled_' + file.replace("100", "---"))
+        scale_test(test_dir + '/' + file, test_dir + input_files[-1], scale)
+
+    sumDiff = 0
+    timeouts = 0
 
     for input_file in input_files:
         args = ["./result.o"]
@@ -106,10 +128,56 @@ def runLargeTests(runParams=[]):
         proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
             proc.wait(500)
-            print("Done", time.time() - start)
+            sumDiff += time.time() - start
+            # print("Done", time.time() - start)
+        except KeyboardInterrupt as keyboard:
+            print("Keyboard")
+            proc.terminate()
+            sys.exit(0)
         except:
             print("Timeout")
+            timeouts += 1
             proc.terminate()
+    print(runParams, sumDiff, timeouts)
+
+def createLargeTest(filename, size):
+    items = []
+    total_weight = 0
+    for i in range(size):
+        w = np.random.randint(1, 101)
+        p = w + 10
+        items.append((p, w))
+        total_weight += w
+    with open(filename, "w") as inp:
+        inp.write(str(size) + " " + str(int(total_weight / 2)) + "\n")
+        for (p, w) in items:
+            inp.write(str(p) + " " + str(w) + "\n")
+
+def runUltraLargeTests(input_files, runParams=[]):
+    sumDiff = 0
+    timeouts = 0
+
+    for input_file in input_files:
+        args = ["./result.o"]
+        for param in runParams:
+            args.append(param)
+        
+        start = time.time()
+        proc = sp.Popen(args, stdin=open("./" + input_file, 'r'), stdout=open("output.txt", 'w'))
+        try:
+            proc.wait(500)
+            sumDiff += time.time() - start
+            # print("Done", time.time() - start)
+        except KeyboardInterrupt as keyboard:
+            print("Keyboard")
+            proc.terminate()
+            sys.exit(0)
+        except:
+            print("Timeout")
+            timeouts += 1
+            proc.terminate()
+    print(runParams, sumDiff, timeouts)
+
 
 def main():
     make()
@@ -124,8 +192,16 @@ def main():
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
 
-    runLargeTests(["mode=single"])
-    runLargeTests(["mode=multi"])
+    for size in [250, 500, 750, 1000]:
+        createLargeTest("input.txt", size)
+        runUltraLargeTests(["input.txt"], ["mode=single_opt"])
+        runUltraLargeTests(["input.txt"], ["mode=multi"])
+        print()
+
+    # for scale in [0.1, 0.25, .5, .75, 1.0]:
+    #     print(scale)
+    #     runLargeTests(["mode=single_opt"], scale)
+    #     runLargeTests(["mode=multi"], scale)
 
 if __name__ == '__main__':
     main()

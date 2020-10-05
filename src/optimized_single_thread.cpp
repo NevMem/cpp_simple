@@ -61,22 +61,36 @@ private:
             currentBest_ = current_;
         }
 
-        if (calculateUpperBound(items, capacity, current_, minUnusedIndex) <= currentBest_.cost) {
-            return;
-        }
+        std::vector<std::pair<double, size_t>> values;
 
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current_.capacity + items[i].size <= capacity) {
-                current_.capacity += items[i].size;
-                current_.cost += items[i].cost;
-                current_.indices.insert(i);
-
-                run(items, capacity, i + 1);
-
-                current_.indices.erase(i);
-                current_.capacity -= items[i].size;
-                current_.cost -= items[i].cost;
+                {
+                    current_.cost += items[i].cost;
+                    current_.capacity += items[i].size;
+                    const auto upperBound = calculateUpperBound(items, capacity, current_, i + 1);
+                    if (upperBound >= currentBest_.cost) {
+                        values.push_back({ upperBound, i });
+                    }
+                    current_.cost -= items[i].cost;
+                    current_.capacity -= items[i].size;
+                }
             }
+        }
+
+        std::sort(values.rbegin(), values.rend());
+
+        for (const auto& value : values) {
+            const auto i = value.second;
+            current_.cost += items[i].cost;
+            current_.capacity += items[i].size;
+            current_.indices.insert(i);
+
+            run(items, capacity, i + 1);
+
+            current_.indices.erase(i);
+            current_.capacity -= items[i].size;
+            current_.cost -= items[i].cost;
         }
     }
 

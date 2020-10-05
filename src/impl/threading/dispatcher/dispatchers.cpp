@@ -221,8 +221,14 @@ private:
                     log("run", "Executing pack from queue (time in queue: " + std::to_string(pack->timeSinceCreation().count()) + " ns)");
                     totalInQueueTime_ += pack->timeSinceCreation();
 #endif
+#ifdef DISPATCHER_LOGGING
+                    const auto start = std::chrono::high_resolution_clock::now();
+#endif
                     (*pack)();
-                    log("run", "Done");
+#ifdef DISPATCHER_LOGGING
+                    const auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - start).count();
+                    log("run", "Done in " + std::to_string(diff));
+#endif
                     {
                         std::lock_guard<std::mutex> guard(mutex_);
                         busyThreads_ -= 1;
