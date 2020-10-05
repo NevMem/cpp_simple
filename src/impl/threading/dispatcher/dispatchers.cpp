@@ -210,6 +210,14 @@ private:
             while (true) {
                 QueuePackType pack;
                 {
+                    std::lock_guard<std::mutex> guard(mutex_);
+                    if (!queue_.empty()) {
+                        pack = std::move(queue_.front());
+                        queue_.pop();
+                        busyThreads_ += 1;
+                    }
+                }
+                if (!pack) {
                     std::unique_lock<std::mutex> lock(mutex_);
                     cv_.wait(lock, [this] { return !queue_.empty(); });
                     pack = std::move(queue_.front());

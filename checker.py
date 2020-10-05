@@ -165,7 +165,7 @@ def runUltraLargeTests(input_files, runParams=[]):
         start = time.time()
         proc = sp.Popen(args, stdin=open("./" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
-            proc.wait(500)
+            proc.wait(5000)
             sumDiff += time.time() - start
             # print("Done", time.time() - start)
         except KeyboardInterrupt as keyboard:
@@ -192,7 +192,7 @@ def main():
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
 
-    for size in [250, 500, 750, 1000]:
+    for size in [200, 500, 1000, 10000]:
         createLargeTest("input.txt", size)
         runUltraLargeTests(["input.txt"], ["mode=single_opt"])
         runUltraLargeTests(["input.txt"], ["mode=multi"])
