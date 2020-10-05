@@ -65,16 +65,14 @@ private:
 
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current_.capacity + items[i].size <= capacity) {
-                {
-                    current_.cost += items[i].cost;
-                    current_.capacity += items[i].size;
-                    const auto upperBound = calculateUpperBound(items, capacity, current_, i + 1);
-                    if (upperBound >= currentBest_.cost) {
-                        values.push_back({ upperBound, i });
-                    }
-                    current_.cost -= items[i].cost;
-                    current_.capacity -= items[i].size;
+                current_.cost += items[i].cost;
+                current_.capacity += items[i].size;
+                const auto upperBound = calculateUpperBound(items, capacity, current_, i + 1);
+                if (upperBound >= currentBest_.cost) {
+                    values.push_back({ upperBound, i });
                 }
+                current_.cost -= items[i].cost;
+                current_.capacity -= items[i].size;
             }
         }
 
