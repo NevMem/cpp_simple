@@ -75,7 +75,7 @@ private:
         std::mutex writeMutex;
         for (size_t i = minUnusedIndex; i != items.size(); ++i) {
             if (current_.capacity + items[i].size <= capacity) {
-                futures.push_back(threading::dispatcher::unstable()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {        
+                futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {        
                     const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
                     if (upperBound >= currentBest_.cost) {
                         std::lock_guard<std::mutex> guard(writeMutex);
