@@ -120,7 +120,7 @@ public:
         for (size_t i = 0; i != items.size(); ++i) {
             sortedItems[permutation[i]] = items[i];
         }
-        run(InternalResult { 0, 0, {}, {} }, sortedItems, capacity);
+        run(sortedItems, capacity);
         return toResult(currentBest_, permutation);
     }
 
@@ -138,12 +138,11 @@ private:
         return Result { result.cost, result.capacity, res };
     }
 
-    void run(InternalResult current, const std::vector<Item>& items, size_t capacity)
+    void run(const std::vector<Item>& items, size_t capacity)
     {
         {
-            std::lock_guard<std::mutex> guard(bestResultMutex_);
-            if (currentBest_.cost < current.cost) {
-                currentBest_ = current;
+            if (currentBest_.cost < current_.cost) {
+                currentBest_ = current_;
             }
         }
 
@@ -151,13 +150,13 @@ private:
         std::vector<int> values;
         std::mutex writeMutex;
         for (size_t i = 0; i != items.size(); ++i) {
-            if (current.included.find(i) != current.included.end() || current.excluded.find(i) != current.excluded.end()) {
+            if (current_.included.find(i) != current_.included.end() || current_.excluded.find(i) != current_.excluded.end()) {
                 continue;
             }
             
-            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity, &current](size_t index, std::vector<int>& values) {
-                if (current.capacity + items[index].size <= capacity) {
-                    InternalResult copy = current;
+            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<int>& values) {
+                if (current_.capacity + items[index].size <= capacity) {
+                    InternalResult copy = current_;
                     copy.included.insert(index);
                     copy.cost += items[index].cost;
                     copy.capacity += items[index].size;
@@ -170,8 +169,8 @@ private:
                     }
                 }
             }, i, std::ref(values)));
-            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity, &current](size_t index, std::vector<int>& values) {
-                InternalResult copy = current;
+            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<int>& values) {
+                InternalResult copy = current_;
                 copy.excluded.insert(index);
                 if (calculateUpperBound(
                         items,
@@ -188,21 +187,24 @@ private:
         }
 
         for (const auto& value : values) {
-            auto copy = current;
             if (value > 0) {
-                copy.included.insert(value - 1);
-                copy.capacity += items[value - 1].size;
-                copy.cost += items[value - 1].cost;
-                run(copy, items, capacity);
+                current_.included.insert(value - 1);
+                current_.capacity += items[value - 1].size;
+                current_.cost += items[value - 1].cost;
+                run(items, capacity);
+                current_.included.erase(value - 1);
+                current_.capacity -= items[value - 1].size;
+                current_.cost -= items[value - 1].cost;
                 continue;
             }
-            copy.excluded.insert(-value - 1);
-            run(copy, items, capacity);
+            current_.excluded.insert(-value - 1);
+            run(items, capacity);
+            current_.excluded.erase(-value - 1);
         }
     }
 
     InternalResult currentBest_ = InternalResult { 0, 0, {}, {} };
-    std::mutex bestResultMutex_;
+    InternalResult current_ = InternalResult { 0, 0, {}, {} };
 };
 
 }

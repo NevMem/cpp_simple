@@ -115,10 +115,10 @@ def main():
     make()
     runs = 1
 
-    runTime, oks = runSmallTests(runs, ["mode=single"])
+    runTime, oks = runSmallTests(runs, ["mode=single_opt"])
     print(runTime, oks)
 
-    runTime, oks = runSmallTests(runs, ["mode=single_opt"])
+    runTime, oks = runSmallTests(runs, ["mode=single"])
     print(runTime, oks)
 
     runTime, oks = runSmallTests(runs, ["mode=multi"])
