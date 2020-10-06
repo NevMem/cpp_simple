@@ -100,10 +100,6 @@ public:
     void onDestroy()
     {
 #ifdef DISPATCHER_PROFILING
-        paused_ = true;
-        for (auto& thread : threads) {
-            thread.join();
-        }
         profilingRunning_ = false;
         profilingThread_.join();
         profile();
@@ -138,7 +134,7 @@ private:
     std::thread makeThread()
     {
         return std::thread([this]() {
-            while (!isPaused()) {
+            while (true) {
                 QueuePackType pack;
                 {
                     std::lock_guard<std::mutex> guard(mutex_);
@@ -189,11 +185,6 @@ private:
         });
     }
 
-    inline bool isPaused() const
-    {
-        return paused_;
-    }
-
     void initializeThreads()
     {
         log("init", "Initializing threads");
@@ -236,7 +227,6 @@ private:
 #endif
     std::mutex mutex_;
     std::condition_variable cv_;
-    bool paused_ = false;
 
     std::vector<std::thread> threads_;
 };
