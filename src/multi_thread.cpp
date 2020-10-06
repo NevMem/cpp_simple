@@ -89,7 +89,8 @@ private:
             future.get();
         }
 
-        std::sort(values.rbegin(), values.rend());
+        std::sort(values.begin(), values.end());
+        std::reverse(values.begin(), values.end());
 
         for (const auto& value : values) {
             current_.included.insert(value.second);

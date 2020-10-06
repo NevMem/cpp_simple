@@ -128,6 +128,9 @@ def runLargeTests(runParams=[], scale=1.0):
         proc = sp.Popen(args, stdin=open(test_dir + "/" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
             proc.wait(500)
+            if proc.returncode != 0:
+                print("Return code", proc.returncode)
+                sys.exit(0)
             sumDiff += time.time() - start
             # print("Done", time.time() - start)
         except KeyboardInterrupt as keyboard:
