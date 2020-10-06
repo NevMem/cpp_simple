@@ -179,6 +179,15 @@ public:
         return !queue_.empty() || busyThreads_ != 0;
     }
 
+    void onDestroy()
+    {
+#ifdef DISPATCHER_PROFILING
+        profilingRunning_ = false;
+        profilingThread_.join();
+        profile();
+#endif
+    }
+
 protected:
     virtual void dispatch(std::unique_ptr<BasePack>&& pack) override
     {
@@ -263,7 +272,7 @@ private:
 
 #ifdef DISPATCHER_PROFILING
         profilingThread_ = std::thread([this]() {
-            while (true) {
+            while (profilingRunning_) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 profile();
             }
@@ -275,10 +284,11 @@ private:
     void profile() const {
         logProfile("Dispatched " + std::to_string(dispatchedPacks_)
             + ", total time in queue: " + std::to_string(totalInQueueTime_.count())
-            + ", average latency: " + std::to_string(totalInQueueTime_.count() / dispatchedPacks_));
+            + ", average latency: " + std::to_string(totalInQueueTime_.count() / std::max(static_cast<size_t>(1), dispatchedPacks_)));
     }
 
     std::thread profilingThread_;
+    bool profilingRunning_ = true;
 
     mutable std::mutex profilingMutex_;
 #endif
@@ -286,7 +296,7 @@ private:
 #ifdef DISPATCHER_EXTENSIONS
     std::queue<QueuePackType> queue_;
     std::chrono::duration<long long, std::nano> totalInQueueTime_ = std::chrono::duration<long long, std::nano>(0);
-    size_t dispatchedPacks_;
+    size_t dispatchedPacks_ = 0;
 #else
     std::queue<QueuePackType> queue_;
 #endif
@@ -317,6 +327,17 @@ Dispatcher* io()
 Dispatcher* computation()
 {
     return &singleton::singleton<ThreadPoolDispatcher<8>, 1>();
+}
+
+void beforeDestroy()
+{
+    while (computation()->hasTasks());
+    while (io()->hasTasks());
+    while (single()->hasTasks());
+    
+    if (const auto dispatcher = dynamic_cast<ThreadPoolDispatcher<8>*>(computation())) {
+        dispatcher->onDestroy();
+    }
 }
 
 }

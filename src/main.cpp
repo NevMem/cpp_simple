@@ -70,4 +70,6 @@ int main(int argc, char** argv) {
         std::cout << index + 1 << " ";
     }
     std::cout << std::endl;
+
+    threading::dispatcher::beforeDestroy();
 }

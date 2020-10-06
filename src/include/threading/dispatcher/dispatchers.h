@@ -9,4 +9,6 @@ Dispatcher* single();
 Dispatcher* io();
 Dispatcher* computation();
 
+void beforeDestroy();
+
 }
