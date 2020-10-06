@@ -5,6 +5,7 @@
 #include <mutex>
 
 #include <threading/dispatcher/dispatchers.h>
+#include <threading/dispatcher/internal/internal.h>
 
 namespace {
 
@@ -73,16 +74,21 @@ private:
         std::vector<std::pair<double, size_t>> values;
         values.reserve(items.size() - minUnusedIndex);
         std::mutex writeMutex;
-        for (size_t i = minUnusedIndex; i != items.size(); ++i) {
-            if (current_.capacity + items[i].size <= capacity) {
-                futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t index, std::vector<std::pair<double, size_t>>& values) {        
-                    const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
-                    if (upperBound >= currentBest_.cost) {
-                        std::lock_guard<std::mutex> guard(writeMutex);
-                        values.push_back({ upperBound, index });
+        const size_t threadsAvailable = threading::dispatcher::internal::COMPUTATION_THREAD_POOL_SIZE;
+        const size_t remItems = items.size() - minUnusedIndex;
+        const size_t blockSize = (remItems + threadsAvailable - 1) / threadsAvailable;
+        for (size_t i = 0; i != threadsAvailable; ++i) {
+            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t from, size_t to, std::vector<std::pair<double, size_t>>& values) {        
+                for (size_t index = from; index < to; ++index) {
+                    if (current_.capacity + items[index].size <= capacity) {
+                        const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
+                        if (upperBound >= currentBest_.cost) {
+                            std::lock_guard<std::mutex> guard(writeMutex);
+                            values.push_back({ upperBound, index });
+                        }
                     }
-                }, i, std::ref(values)));
-            }
+                }
+            }, minUnusedIndex + i * blockSize, std::min(items.size(), minUnusedIndex + (i + 1) * blockSize), std::ref(values)));
         }
 
         for (auto& future : futures) {

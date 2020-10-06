@@ -1,4 +1,5 @@
 #include <threading/dispatcher/dispatcher.h>
+#include <threading/dispatcher/internal/internal.h>
 
 #include <singleton/singleton.h>
 
@@ -13,6 +14,13 @@
 #endif
 
 namespace threading::dispatcher {
+
+namespace internal {
+
+const size_t COMPUTATION_THREAD_POOL_SIZE = 8;
+const size_t IO_THREAD_POOL_SIZE = 4;
+
+}
 
 namespace {
 
@@ -235,17 +243,17 @@ private:
 
 Dispatcher* io()
 {
-    return &singleton::singleton<ThreadPoolDispatcher<4>, 0>();
+    return &singleton::singleton<ThreadPoolDispatcher<internal::IO_THREAD_POOL_SIZE>, 0>();
 }
 
 Dispatcher* computation()
 {
-    return &singleton::singleton<ThreadPoolDispatcher<8>, 1>();
+    return &singleton::singleton<ThreadPoolDispatcher<internal::COMPUTATION_THREAD_POOL_SIZE>, 1>();
 }
 
 void beforeDestroy()
 {
-    if (const auto dispatcher = dynamic_cast<ThreadPoolDispatcher<8>*>(computation())) {
+    if (const auto dispatcher = dynamic_cast<ThreadPoolDispatcher<internal::COMPUTATION_THREAD_POOL_SIZE>*>(computation())) {
         dispatcher->onDestroy();
     }
 }
