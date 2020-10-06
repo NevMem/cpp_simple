@@ -195,8 +195,9 @@ def main():
     runTime, oks = runSmallTests(runs, ["mode=multi"])
     print(runTime, oks)
 
-    for size in [200, 500, 1000, 5000, 10000, 20000]:
+    for size in [100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600]:
         createLargeTest("input.txt", size)
+        print(size)
         runUltraLargeTests(["input.txt"], ["mode=single_opt"])
         runUltraLargeTests(["input.txt"], ["mode=multi"])
         print()
