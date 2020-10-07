@@ -78,9 +78,9 @@ private:
         const size_t remItems = items.size() - minUnusedIndex;
         const size_t blockSize = (remItems + threadsAvailable - 1) / threadsAvailable;
         for (size_t i = 0; i != threadsAvailable; ++i) {
-            futures.push_back(threading::dispatcher::computation()->async([this, &items, &writeMutex, capacity](size_t from, size_t to, std::vector<std::pair<double, size_t>>& values) {        
+            futures.push_back(threading::dispatcher::computation()->async([this, &blockSize, &items, &writeMutex, capacity](size_t from, std::vector<std::pair<double, size_t>>& values) {        
                 std::vector<std::pair<double, size_t>> buffer;
-                for (size_t index = from; index < to; ++index) {
+                for (size_t index = from; index < items.size(); index += blockSize) {
                     if (current_.capacity + items[index].size <= capacity) {
                         const auto upperBound = calculateUpperBound(items, capacity, current_.cost + items[index].cost, current_.capacity + items[index].size, index + 1);
                         if (upperBound >= currentBest_.cost) {
@@ -92,7 +92,7 @@ private:
                 for (const auto& value : buffer) {
                     values.push_back(value);
                 }
-            }, minUnusedIndex + i * blockSize, std::min(items.size(), minUnusedIndex + (i + 1) * blockSize), std::ref(values)));
+            }, minUnusedIndex + i, std::ref(values)));
         }
 
         for (auto& future : futures) {

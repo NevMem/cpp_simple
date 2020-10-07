@@ -58,12 +58,7 @@ int main(int argc, char** argv) {
 
     auto solution = createSolution(argc, argv);
 
-    auto result = threading::dispatcher::single()->async([](
-            Solution* const solution,
-            const std::vector<Item>& items,
-            size_t capacity) -> Result {
-        return solution->solve(items, capacity);
-    }, solution.get(), std::cref(items), capacity).get();
+    const auto result = solution->solve(items, capacity);
 
     std::cout << result.cost << "\n";
     for (const auto& index : result.indices) {
