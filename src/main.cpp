@@ -45,7 +45,6 @@ std::unique_ptr<Solution> createSolution(int argc, char** argv)
 }
 
 int main(int argc, char** argv) {
-    auto start = std::chrono::high_resolution_clock::now();
     size_t count = 0, capacity = 0;
     std::cin >> count >> capacity;
     std::vector<Item> items;
@@ -71,8 +70,6 @@ int main(int argc, char** argv) {
         std::cout << index + 1 << " ";
     }
     std::cout << std::endl;
-
-    std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count() << std::endl;
 
     threading::dispatcher::beforeDestroy();
 }
