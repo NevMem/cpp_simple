@@ -102,7 +102,7 @@ private:
         std::sort(values.rbegin(), values.rend());
 
         for (const auto& value : values) {
-            if (value.first >= currentBest_.cost) {
+            if (value.first > currentBest_.cost) {
                 current_.included.insert(value.second);
                 current_.capacity += items[value.second].size;
                 current_.cost += items[value.second].cost;
