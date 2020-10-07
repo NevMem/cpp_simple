@@ -170,6 +170,8 @@ def runUltraLargeTests(input_files, runParams=[]):
         try:
             proc.wait(5000)
             sumDiff += time.time() - start
+            if proc.returncode != 0:
+                print('Return code:', proc.returncode)
             # print("Done", time.time() - start)
         except KeyboardInterrupt as keyboard:
             print("Keyboard")

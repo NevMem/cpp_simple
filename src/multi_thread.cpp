@@ -95,17 +95,18 @@ private:
             future.get();
         }
 
-        std::sort(values.begin(), values.end());
-        std::reverse(values.begin(), values.end());
+        std::sort(values.rbegin(), values.rend());
 
         for (const auto& value : values) {
-            current_.included.insert(value.second);
-            current_.capacity += items[value.second].size;
-            current_.cost += items[value.second].cost;
-            run(items, capacity, value.second + 1);
-            current_.included.erase(value.second);
-            current_.capacity -= items[value.second].size;
-            current_.cost -= items[value.second].cost;
+            if (value.first >= currentBest_.cost) {
+                current_.included.insert(value.second);
+                current_.capacity += items[value.second].size;
+                current_.cost += items[value.second].cost;
+                run(items, capacity, value.second + 1);
+                current_.included.erase(value.second);
+                current_.capacity -= items[value.second].size;
+                current_.cost -= items[value.second].cost;
+            }
         }
     }
 

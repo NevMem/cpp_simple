@@ -79,16 +79,16 @@ private:
         std::sort(values.rbegin(), values.rend());
 
         for (const auto& value : values) {
-            const auto i = value.second;
-            current_.cost += items[i].cost;
-            current_.capacity += items[i].size;
-            current_.indices.insert(i);
-
-            run(items, capacity, i + 1);
-
-            current_.indices.erase(i);
-            current_.capacity -= items[i].size;
-            current_.cost -= items[i].cost;
+            if (value.first > currentBest_.cost) {
+                const auto i = value.second;
+                current_.cost += items[i].cost;
+                current_.capacity += items[i].size;
+                current_.indices.insert(i);
+                run(items, capacity, i + 1);
+                current_.indices.erase(i);
+                current_.capacity -= items[i].size;
+                current_.cost -= items[i].cost;
+            }
         }
     }
 
