@@ -3,6 +3,7 @@ import os
 import subprocess as sp
 import time
 import numpy as np
+import json
 
 def make():
     proc = sp.Popen(["cmake", "."])
@@ -172,6 +173,7 @@ def runUltraLargeTests(input_files, runParams=[]):
             sumDiff += time.time() - start
             if proc.returncode != 0:
                 print('Return code:', proc.returncode)
+                sys.exit(0)
             # print("Done", time.time() - start)
         except KeyboardInterrupt as keyboard:
             print("Keyboard")
@@ -182,6 +184,7 @@ def runUltraLargeTests(input_files, runParams=[]):
             timeouts += 1
             proc.terminate()
     print(runParams, sumDiff, timeouts)
+    return sumDiff
 
 
 def main():
@@ -198,15 +201,22 @@ def main():
     print(runTime, oks)
 
     sizes = []
-    for i in range(1, 31):
+    for i in range(7, 41):
         sizes.append(i * 100)
+
+    result = dict()
+    result["multi"] = []
+    result["single_opt"] = []
 
     for size in sizes:
         createLargeTest("input.txt", size)
         print(size)
-        runUltraLargeTests(["input.txt"], ["mode=single_opt"])
-        runUltraLargeTests(["input.txt"], ["mode=multi"])
+        result["single_opt"].append({ "size": size, "time": runUltraLargeTests(["input.txt"], ["mode=single_opt"]) })
+        result["multi"].append({ "size": size, "time": runUltraLargeTests(["input.txt"], ["mode=multi"])})
         print()
+    
+    with open("result.json", "w") as out:
+        out.write(json.dumps(result))
 
     # for scale in [0.1, 0.25, .5, .75, 1.0]:
     #     print(scale)
