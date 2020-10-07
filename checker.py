@@ -168,7 +168,7 @@ def runUltraLargeTests(input_files, runParams=[]):
         start = time.time()
         proc = sp.Popen(args, stdin=open("./" + input_file, 'r'), stdout=open("output.txt", 'w'))
         try:
-            proc.wait(5000)
+            proc.wait(50000)
             sumDiff += time.time() - start
             if proc.returncode != 0:
                 print('Return code:', proc.returncode)
