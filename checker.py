@@ -201,7 +201,7 @@ def main():
     print(runTime, oks)
 
     sizes = []
-    for i in range(7, 41):
+    for i in range(7, 31):
         sizes.append(i * 100)
 
     result = dict()
@@ -209,11 +209,18 @@ def main():
     result["single_opt"] = []
 
     for size in sizes:
-        createLargeTest("input.txt", size)
-        print(size)
-        result["single_opt"].append({ "size": size, "time": runUltraLargeTests(["input.txt"], ["mode=single_opt"]) })
-        result["multi"].append({ "size": size, "time": runUltraLargeTests(["input.txt"], ["mode=multi"])})
-        print()
+        count_runs = 5
+        multi_whole = 0
+        sinle_opt_whole = 0
+        for runs in range(count_runs):
+            print(size, "run:", runs, '/', count_runs)
+            createLargeTest("input.txt", size)
+            sinle_opt_whole += runUltraLargeTests(["input.txt"], ["mode=single_opt"])
+            multi_whole += runUltraLargeTests(["input.txt"], ["mode=multi"])
+            print()
+        
+        result["single_opt"].append({ "size": size, "time": sinle_opt_whole / count_runs })
+        result["multi"].append({ "size": size, "time": multi_whole / count_runs })
     
     with open("result.json", "w") as out:
         out.write(json.dumps(result))
