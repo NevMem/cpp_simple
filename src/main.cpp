@@ -29,8 +29,6 @@ public:
 };
 
 int main() {
-    threading::dispatcher::initializeDispatchers();
-
     const size_t num_threads = 1000;
     size_t globSum = 0;
     std::mutex mutex;

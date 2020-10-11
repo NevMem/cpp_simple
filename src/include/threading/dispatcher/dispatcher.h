@@ -116,8 +116,6 @@ public:
 
     virtual std::string name() const = 0;
 
-    virtual bool hasTasks() = 0;
-
 protected:
     virtual void dispatch(std::unique_ptr<BasePack>&& pack) = 0;
 };
