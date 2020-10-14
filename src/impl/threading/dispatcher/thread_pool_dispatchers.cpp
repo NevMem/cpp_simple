@@ -1,4 +1,5 @@
 #include <threading/dispatcher/dispatcher.h>
+#include <threading/dispatcher/internal/internal.h>
 
 #include <singleton/singleton.h>
 
@@ -72,12 +73,12 @@ private:
 
 Dispatcher* io()
 {
-    return &singleton::singleton<ThreadPoolDispatcher<4>, 0>();
+    return &singleton::singleton<ThreadPoolDispatcher<internal::IO_POOL_THREADS_COUNT>, 0>();
 }
 
 Dispatcher* computation()
 {
-    return &singleton::singleton<ThreadPoolDispatcher<8>, 1>();
+    return &singleton::singleton<ThreadPoolDispatcher<internal::COMPUTATION_POOL_THREADS_COUNT>, 1>();
 }
 
 }

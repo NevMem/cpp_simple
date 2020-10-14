@@ -123,33 +123,6 @@ result.o/fast:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/build
 .PHONY : result.o/fast
 
-src/impl/threading/dispatcher/dispatchers.o: src/impl/threading/dispatcher/dispatchers.cpp.o
-
-.PHONY : src/impl/threading/dispatcher/dispatchers.o
-
-# target to build an object file
-src/impl/threading/dispatcher/dispatchers.cpp.o:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.o
-.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.o
-
-src/impl/threading/dispatcher/dispatchers.i: src/impl/threading/dispatcher/dispatchers.cpp.i
-
-.PHONY : src/impl/threading/dispatcher/dispatchers.i
-
-# target to preprocess a source file
-src/impl/threading/dispatcher/dispatchers.cpp.i:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.i
-.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.i
-
-src/impl/threading/dispatcher/dispatchers.s: src/impl/threading/dispatcher/dispatchers.cpp.s
-
-.PHONY : src/impl/threading/dispatcher/dispatchers.s
-
-# target to generate assembly for a file
-src/impl/threading/dispatcher/dispatchers.cpp.s:
-	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/dispatchers.cpp.s
-.PHONY : src/impl/threading/dispatcher/dispatchers.cpp.s
-
 src/impl/threading/dispatcher/single_thread_dispatcher.o: src/impl/threading/dispatcher/single_thread_dispatcher.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/single_thread_dispatcher.o
@@ -176,6 +149,33 @@ src/impl/threading/dispatcher/single_thread_dispatcher.s: src/impl/threading/dis
 src/impl/threading/dispatcher/single_thread_dispatcher.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/single_thread_dispatcher.cpp.s
 .PHONY : src/impl/threading/dispatcher/single_thread_dispatcher.cpp.s
+
+src/impl/threading/dispatcher/thread_pool_dispatchers.o: src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.o
+
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.o
+
+# target to build an object file
+src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.o
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.o
+
+src/impl/threading/dispatcher/thread_pool_dispatchers.i: src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.i
+
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.i
+
+# target to preprocess a source file
+src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.i
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.i
+
+src/impl/threading/dispatcher/thread_pool_dispatchers.s: src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.s
+
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.s
+
+# target to generate assembly for a file
+src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.s
+.PHONY : src/impl/threading/dispatcher/thread_pool_dispatchers.cpp.s
 
 src/impl/threading/dispatcher/unstable_dispatcher.o: src/impl/threading/dispatcher/unstable_dispatcher.cpp.o
 
@@ -240,12 +240,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... result.o"
-	@echo "... src/impl/threading/dispatcher/dispatchers.o"
-	@echo "... src/impl/threading/dispatcher/dispatchers.i"
-	@echo "... src/impl/threading/dispatcher/dispatchers.s"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.o"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.i"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.s"
+	@echo "... src/impl/threading/dispatcher/thread_pool_dispatchers.o"
+	@echo "... src/impl/threading/dispatcher/thread_pool_dispatchers.i"
+	@echo "... src/impl/threading/dispatcher/thread_pool_dispatchers.s"
 	@echo "... src/impl/threading/dispatcher/unstable_dispatcher.o"
 	@echo "... src/impl/threading/dispatcher/unstable_dispatcher.i"
 	@echo "... src/impl/threading/dispatcher/unstable_dispatcher.s"
