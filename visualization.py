@@ -59,7 +59,7 @@ def main():
     assert(compile_solution())
 
     # inputFile = input("Enter input file path: ")
-    inputFile = '../lab_2/data/data3.in'
+    inputFile = '../lab_2/data/data5.in'
     
     run_result = run_solution(open(inputFile, 'r'), open('output.txt', 'w'))
     assert(run_result.exit_code == 0)
