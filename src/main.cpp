@@ -5,6 +5,7 @@
 #include <set>
 #include <thread>
 #include <vector>
+#include <omp.h>
 
 #include "data.h"
 #include "point_generator.h"
