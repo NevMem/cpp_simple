@@ -123,6 +123,33 @@ result.o/fast:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/build
 .PHONY : result.o/fast
 
+src/data_util.o: src/data_util.cpp.o
+
+.PHONY : src/data_util.o
+
+# target to build an object file
+src/data_util.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/data_util.cpp.o
+.PHONY : src/data_util.cpp.o
+
+src/data_util.i: src/data_util.cpp.i
+
+.PHONY : src/data_util.i
+
+# target to preprocess a source file
+src/data_util.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/data_util.cpp.i
+.PHONY : src/data_util.cpp.i
+
+src/data_util.s: src/data_util.cpp.s
+
+.PHONY : src/data_util.s
+
+# target to generate assembly for a file
+src/data_util.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/data_util.cpp.s
+.PHONY : src/data_util.cpp.s
+
 src/impl/threading/dispatcher/single_thread_dispatcher.o: src/impl/threading/dispatcher/single_thread_dispatcher.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/single_thread_dispatcher.o
@@ -231,6 +258,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/simple_point_generator.o: src/simple_point_generator.cpp.o
+
+.PHONY : src/simple_point_generator.o
+
+# target to build an object file
+src/simple_point_generator.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/simple_point_generator.cpp.o
+.PHONY : src/simple_point_generator.cpp.o
+
+src/simple_point_generator.i: src/simple_point_generator.cpp.i
+
+.PHONY : src/simple_point_generator.i
+
+# target to preprocess a source file
+src/simple_point_generator.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/simple_point_generator.cpp.i
+.PHONY : src/simple_point_generator.cpp.i
+
+src/simple_point_generator.s: src/simple_point_generator.cpp.s
+
+.PHONY : src/simple_point_generator.s
+
+# target to generate assembly for a file
+src/simple_point_generator.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/simple_point_generator.cpp.s
+.PHONY : src/simple_point_generator.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -240,6 +294,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... result.o"
+	@echo "... src/data_util.o"
+	@echo "... src/data_util.i"
+	@echo "... src/data_util.s"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.o"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.i"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.s"
@@ -252,6 +309,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/simple_point_generator.o"
+	@echo "... src/simple_point_generator.i"
+	@echo "... src/simple_point_generator.s"
 .PHONY : help
 
 
