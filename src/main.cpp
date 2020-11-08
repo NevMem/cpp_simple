@@ -1,9 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <thread>
+#include <cassert>
 #include <functional>
-#include <set>
 #include <future>
+#include <iostream>
+#include <set>
+#include <thread>
+#include <vector>
 
 #include "data.h"
 #include "point_generator.h"
