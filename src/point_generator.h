@@ -13,4 +13,7 @@ public:
 
 std::shared_ptr<PointGenerator> createSimplePointGenerator();
 
+// Seed will be set before EACH generation of points
+std::shared_ptr<PointGenerator> createRandomPointGenerator(int seed);
+
 }

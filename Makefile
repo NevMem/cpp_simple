@@ -258,6 +258,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/random_point_generator.o: src/random_point_generator.cpp.o
+
+.PHONY : src/random_point_generator.o
+
+# target to build an object file
+src/random_point_generator.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/random_point_generator.cpp.o
+.PHONY : src/random_point_generator.cpp.o
+
+src/random_point_generator.i: src/random_point_generator.cpp.i
+
+.PHONY : src/random_point_generator.i
+
+# target to preprocess a source file
+src/random_point_generator.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/random_point_generator.cpp.i
+.PHONY : src/random_point_generator.cpp.i
+
+src/random_point_generator.s: src/random_point_generator.cpp.s
+
+.PHONY : src/random_point_generator.s
+
+# target to generate assembly for a file
+src/random_point_generator.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/random_point_generator.cpp.s
+.PHONY : src/random_point_generator.cpp.s
+
 src/simple_point_generator.o: src/simple_point_generator.cpp.o
 
 .PHONY : src/simple_point_generator.o
@@ -309,6 +336,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/random_point_generator.o"
+	@echo "... src/random_point_generator.i"
+	@echo "... src/random_point_generator.s"
 	@echo "... src/simple_point_generator.o"
 	@echo "... src/simple_point_generator.i"
 	@echo "... src/simple_point_generator.s"

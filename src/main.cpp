@@ -77,7 +77,7 @@ int main() {
         points.push_back(a);
     }
 
-    auto centroids = generator::createSimplePointGenerator()->generatePoints(generateBoundingBox(points), k);
+    auto centroids = generator::createRandomPointGenerator(0)->generatePoints(generateBoundingBox(points), k);
     auto assignment = generateAssignments(points, centroids);
 
     while (true) {
