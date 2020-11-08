@@ -61,7 +61,9 @@ std::vector<Point> generateCentroidsWithAssignment(
         centroids[assignment[i]].y += points[i].y;
     }
 
-    for (size_t i = 0; i != centroids.size(); ++i) {
+    const auto centroidsSize = centroids.size();
+    #pragma omp for
+    for (size_t i = 0; i < centroidsSize; ++i) {
         if (countPoints[i] > 0) {
             centroids[i].x /= countPoints[i];
             centroids[i].y /= countPoints[i];
