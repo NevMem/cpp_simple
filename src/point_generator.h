@@ -2,6 +2,8 @@
 
 #include "data.h"
 
+#include <memory>
+
 namespace generator {
 
 class PointGenerator {
