@@ -18,8 +18,9 @@ std::vector<size_t> generateAssignments(
     const std::vector<Point>& centroids)
 {
     Assignment assignment(points.size());
+    const size_t pointsCount = points.size();
     #pragma omp for
-    for (size_t i = 0; i != points.size(); ++i) {
+    for (size_t i = 0; i < pointsCount; ++i) {
         double minDistance = distance(points[i], centroids[0]);
         size_t assign = 0;
         for (size_t j = 1; j != centroids.size(); ++j) {
