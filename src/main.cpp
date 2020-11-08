@@ -6,10 +6,20 @@
 #include <set>
 #include <thread>
 #include <vector>
+
+#ifdef USE_OMP
 #include <omp.h>
+#endif
 
 #include "data.h"
 #include "point_generator.h"
+
+
+#ifdef USE_OMP
+#define OMP_FOR_IF_NEEDED #pragma omp for num_threads(NUM_THREADS)
+#else
+#define OMP_FOR_IF_NEEDED
+#endif
 
 typedef std::vector<size_t> Assignment;
 
@@ -19,7 +29,8 @@ std::vector<size_t> generateAssignments(
 {
     Assignment assignment(points.size());
     const size_t pointsCount = points.size();
-    #pragma omp for
+
+    OMP_FOR_IF_NEEDED
     for (size_t i = 0; i < pointsCount; ++i) {
         double minDistance = distance(points[i], centroids[0]);
         size_t assign = 0;
@@ -62,7 +73,8 @@ std::vector<Point> generateCentroidsWithAssignment(
     }
 
     const auto centroidsSize = centroids.size();
-    #pragma omp for
+    
+    OMP_FOR_IF_NEEDED
     for (size_t i = 0; i < centroidsSize; ++i) {
         if (countPoints[i] > 0) {
             centroids[i].x /= countPoints[i];
