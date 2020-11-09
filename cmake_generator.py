@@ -19,6 +19,7 @@ class CMakeGenerator:
         if use_o2:
             flags += '-O2 '
         if use_omp:
+            flags += '-fopenmp '
             flags += '-DUSE_OMP '
             flags += '-DNUM_THREADS=' + str(omp_threads) + ' '
         if use_pthread:
