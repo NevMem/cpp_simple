@@ -24,8 +24,8 @@ std::vector<size_t> generateAssignments(
     const size_t pointsCount = points.size();
 
     #ifdef USE_OMP
-    #pragma omp parallel
-    #pragma omp for num_threads(NUM_THREADS)
+    #pragma omp parallel num_threads(NUM_THREADS)
+    #pragma omp for
     #endif
     for (size_t i = 0; i < pointsCount; ++i) {
         double minDistance = distance(points[i], centroids[0]);
@@ -67,8 +67,8 @@ std::vector<Point> generateCentroidsWithAssignment(
     }
 
     #ifdef USE_OMP
-    #pragma omp parallel
-    #pragma omp for num_threads(NUM_THREADS)
+    #pragma omp parallel num_threads(NUM_THREADS)
+    #pragma omp for
     #endif
     for (size_t i = 0; i < countCentroids; ++i) {
         for (const auto& index : indicesByAssignment[i]) {
