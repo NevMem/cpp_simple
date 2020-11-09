@@ -14,14 +14,6 @@
 #include "data.h"
 #include "point_generator.h"
 
-
-#ifdef USE_OMP // MacOS cannot compile with -fopenmp, so this is just for debug usage
-#define OMP_FOR_IF_NEEDED #pragma omp parallel \
-#pragma omp for num_threads(NUM_THREADS)
-#else
-#define OMP_FOR_IF_NEEDED
-#endif
-
 typedef std::vector<size_t> Assignment;
 
 std::vector<size_t> generateAssignments(
@@ -31,7 +23,10 @@ std::vector<size_t> generateAssignments(
     Assignment assignment(points.size());
     const size_t pointsCount = points.size();
 
-    OMP_FOR_IF_NEEDED
+    #ifdef USE_OMP
+    #pragma omp parallel
+    #pragma omp for num_threads(NUM_THREADS)
+    #endif
     for (size_t i = 0; i < pointsCount; ++i) {
         double minDistance = distance(points[i], centroids[0]);
         size_t assign = 0;
@@ -71,7 +66,10 @@ std::vector<Point> generateCentroidsWithAssignment(
         indicesByAssignment[assignment[i]].push_back(i);
     }
 
-    OMP_FOR_IF_NEEDED
+    #ifdef USE_OMP
+    #pragma omp parallel
+    #pragma omp for num_threads(NUM_THREADS)
+    #endif
     for (size_t i = 0; i < countCentroids; ++i) {
         for (const auto& index : indicesByAssignment[i]) {
             centroids[i].x += points[index].x;
