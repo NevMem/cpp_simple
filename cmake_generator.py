@@ -11,7 +11,7 @@ class CMakeGenerator:
         with open('CMakeLists.txt', 'r') as inp:
             self.lists_backup = inp.read()
 
-    def generate(self, use_o2=False, use_omp=False, omp_threads=None, cpp_version=17, use_pthread=False):
+    def generate(self, use_o2=False, use_omp=False, omp_threads=None, cpp_version=17, use_pthread=True):
         assert(use_omp == False or (use_omp == True and (omp_threads is not None))) # If use_omp is set number of threads should be set too
         self.save_backup()
 
