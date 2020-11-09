@@ -16,7 +16,8 @@
 
 
 #ifdef USE_OMP // MacOS cannot compile with -fopenmp, so this is just for debug usage
-#define OMP_FOR_IF_NEEDED #pragma omp for num_threads(NUM_THREADS)
+#define OMP_FOR_IF_NEEDED #pragma omp parallel \
+#pragma omp for num_threads(NUM_THREADS)
 #else
 #define OMP_FOR_IF_NEEDED
 #endif
