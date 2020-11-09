@@ -64,21 +64,21 @@ std::vector<Point> generateCentroidsWithAssignment(
     size_t countCentroids)
 {
     std::vector<Point> centroids(countCentroids, {0, 0});
-    std::vector<size_t> countPoints(countCentroids);
 
+    std::vector<std::vector<size_t>> indicesByAssignment(countCentroids, std::vector<size_t>());
     for (size_t i = 0; i != points.size(); ++i) {
-        countPoints[assignment[i]] += 1;
-        centroids[assignment[i]].x += points[i].x;
-        centroids[assignment[i]].y += points[i].y;
+        indicesByAssignment[assignment[i]].push_back(i);
     }
 
-    const auto centroidsSize = centroids.size();
-    
     OMP_FOR_IF_NEEDED
-    for (size_t i = 0; i < centroidsSize; ++i) {
-        if (countPoints[i] > 0) {
-            centroids[i].x /= countPoints[i];
-            centroids[i].y /= countPoints[i];
+    for (size_t i = 0; i < countCentroids; ++i) {
+        for (const auto& index : indicesByAssignment[i]) {
+            centroids[i].x += points[index].x;
+            centroids[i].y += points[index].y;
+        }
+        if (!indicesByAssignment[i].empty()) {
+            centroids[i].x /= indicesByAssignment[i].size();
+            centroids[i].y /= indicesByAssignment[i].size();
         }
     }
 
