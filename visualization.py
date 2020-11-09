@@ -1,16 +1,19 @@
-import matplotlib.pyplot as plt
-import subprocess as sp
-import numpy as np
+from cmake_generator import CMakeGenerator
 from typing import List
+import matplotlib.pyplot as plt
+import numpy as np
+import subprocess as sp
+import sys
 import time
 
-def regenerate_cmake() -> bool:
+def regenerate_cmake(generator: CMakeGenerator, use_omp, omp_threads) -> bool:
+    generator.generate(use_o2=True, use_omp=use_omp, omp_threads=omp_threads)
     process = sp.Popen(['cmake', '.'])
     process.wait()
     return process.returncode == 0
 
-def compile_solution() -> bool:
-    if not regenerate_cmake():
+def compile_solution(generator: CMakeGenerator, use_omp, omp_threads) -> bool:
+    if not regenerate_cmake(generator, use_omp, omp_threads):
         print('Cmake regeneration failed!')
         return False
     process = sp.Popen(['make'])
@@ -56,10 +59,19 @@ def run_solution(inputFile, outputFile):
     return RunResult(process.returncode, delta)
 
 def main():
-    assert(compile_solution())
+    use_omp = False
+    omp_threads = None
+    if len(sys.argv) > 1:
+        use_omp = True
+        omp_threads = int(sys.argv[1])
+
+    cmake_generator = CMakeGenerator()
+    compilcation_result = compile_solution(cmake_generator, use_omp, omp_threads)
+    cmake_generator.restore_backup()
+    assert(compilcation_result)
 
     # inputFile = input("Enter input file path: ")
-    inputFile = '../lab_2/data/data5.in'
+    inputFile = '../lab_2/data/data1.in'
     
     run_result = run_solution(open(inputFile, 'r'), open('output.txt', 'w'))
     assert(run_result.exit_code == 0)

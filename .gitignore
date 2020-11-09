@@ -3,3 +3,6 @@ CMakeFiles/**
 CMakeCache.txt
 cmake_install.cmake
 *.o
+**/__pycache__/**
+output.txt
+output_image.png
