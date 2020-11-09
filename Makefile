@@ -150,6 +150,33 @@ src/data_util.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/data_util.cpp.s
 .PHONY : src/data_util.cpp.s
 
+src/impl/logger/logger.o: src/impl/logger/logger.cpp.o
+
+.PHONY : src/impl/logger/logger.o
+
+# target to build an object file
+src/impl/logger/logger.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/logger/logger.cpp.o
+.PHONY : src/impl/logger/logger.cpp.o
+
+src/impl/logger/logger.i: src/impl/logger/logger.cpp.i
+
+.PHONY : src/impl/logger/logger.i
+
+# target to preprocess a source file
+src/impl/logger/logger.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/logger/logger.cpp.i
+.PHONY : src/impl/logger/logger.cpp.i
+
+src/impl/logger/logger.s: src/impl/logger/logger.cpp.s
+
+.PHONY : src/impl/logger/logger.s
+
+# target to generate assembly for a file
+src/impl/logger/logger.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/logger/logger.cpp.s
+.PHONY : src/impl/logger/logger.cpp.s
+
 src/impl/threading/dispatcher/single_thread_dispatcher.o: src/impl/threading/dispatcher/single_thread_dispatcher.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/single_thread_dispatcher.o
@@ -324,6 +351,9 @@ help:
 	@echo "... src/data_util.o"
 	@echo "... src/data_util.i"
 	@echo "... src/data_util.s"
+	@echo "... src/impl/logger/logger.o"
+	@echo "... src/impl/logger/logger.i"
+	@echo "... src/impl/logger/logger.s"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.o"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.i"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.s"

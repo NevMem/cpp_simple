@@ -6,3 +6,4 @@ cmake_install.cmake
 **/__pycache__/**
 output.txt
 output_image.png
+*.log

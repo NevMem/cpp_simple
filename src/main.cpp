@@ -11,6 +11,8 @@
 #include <omp.h>
 #endif
 
+#include <logger/logger.h>
+
 #include "data.h"
 #include "point_generator.h"
 
@@ -85,6 +87,12 @@ std::vector<Point> generateCentroidsWithAssignment(
 }
 
 int main() {
+    logger::initializeLogger("run");
+
+#ifndef USE_LOG
+    logger::logger()->setLogingEnabled(false);
+#endif
+
     size_t n, k;
     std::cin >> n >> k;
     std::vector<Point> points;
@@ -94,11 +102,13 @@ int main() {
         std::cin >> a.x >> a.y;
         points.push_back(a);
     }
+    logger::logger()->log("loaded all data");
 
     auto centroids = generator::createRandomPointGenerator(0)->generatePoints(generateBoundingBox(points), k);
     auto assignment = generateAssignments(points, centroids);
 
     while (true) {
+        logger::logger()->log("starting new step");
         auto newCentroids = generateCentroidsWithAssignment(points, assignment, k);
         centroids = std::move(newCentroids);
         auto newAssignment = generateAssignments(points, centroids);
@@ -107,6 +117,8 @@ int main() {
         }
         assignment = std::move(newAssignment);
     }
+
+    logger::logger()->log("writing output");
 
     for (size_t i = 0; i != centroids.size(); ++i) {
         std::cout << centroids[i].x << " " << centroids[i].y << std::endl;
