@@ -88,7 +88,6 @@ std::vector<Point> generateCentroidsWithAssignment(
 
 int main() {
     logger::initializeLogger("run");
-
 #ifndef USE_LOG
     logger::logger()->setLogingEnabled(false);
 #endif
