@@ -21,7 +21,7 @@ def compile_solution(generator: CMakeGenerator, use_omp, omp_threads) -> bool:
     return process.returncode == 0
 
 def generate_colors() -> List[str]:
-    possibleParts = ['00', '20', '40', '60', '80', 'A0', 'C0', 'D0', 'F0']
+    possibleParts = ['00', '20', '40', '60', '70', '80', 'A0', 'C0', 'D0', 'F0']
     colors = []
     for part_1 in possibleParts:
         for part_2 in possibleParts:
