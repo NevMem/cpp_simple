@@ -67,7 +67,7 @@ def main():
 
     cmake_generator = CMakeGenerator()
     compilcation_result = compile_solution(cmake_generator, use_omp, omp_threads)
-    cmake_generator.restore_backup()
+    # cmake_generator.restore_backup()
     assert(compilcation_result)
 
     # inputFile = input("Enter input file path: ")
