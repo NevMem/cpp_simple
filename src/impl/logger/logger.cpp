@@ -1,5 +1,6 @@
 #include <logger/logger.h>
 
+#include <cassert>
 #include <fstream>
 #include <mutex>
 
