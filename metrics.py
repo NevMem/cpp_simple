@@ -111,12 +111,19 @@ def run_test_with_threads(test: str, omp_threads=None):
         plt.close()
     return FullTestRunResult(run_result, output_file_name, output_image_file_name)
 
+def prettify_delta(delta: float) -> str:
+    return str(int(delta * 1000) / 1000)
+
 def main():
     tests = ['1', '2', '3', '4', '5']
-    omp_params = [None, 1, 2]
-    descriptions = ['No omp threads', '1 OMP thread', '2 OMP threads']
-    os.makedirs('outputs/outs', exist_ok=True)
-    os.makedirs('outputs/images', exist_ok=True)
+    omp_params = [None, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    descriptions = ['No omp threads', '1 OMP thread', '2 OMP threads', '3 OMP threads',
+        '4 OMP threads', '5 OMP threads', '6 OMP threads', '7 OMP threads', '8 OMP threads',
+        '9 OMP threads']
+
+    output_dirs = ['outputs/outs', 'outputs/images', 'outputs/charts']
+    for output_dir in output_dirs:
+        os.makedirs(output_dir, exist_ok=True)
 
     metrics_for_tests = dict()
 
@@ -128,17 +135,22 @@ def main():
             shutil.copyfile(result.output_image_file_name, 'outputs/images/image_result' + test + '.png')
             metrics_for_tests[test].append({'description': description, 'time': result.run_result.delta})
     
-    with open('metrics.json', 'w') as out:
+    with open('outputs/metrics.json', 'w') as out:
         out.write(json.dumps(metrics_for_tests))
 
     for test in metrics_for_tests:
         indices = [i for i, _ in enumerate(metrics_for_tests[test])]
-        plt.figure(figsize=(10, 4))
-        plt.bar(indices, list(map(lambda x: x['time'], metrics_for_tests[test])))
+        plt.figure(figsize=(16, 7))
+        deltas = list(map(lambda x: x['time'], metrics_for_tests[test]))
+        plt.bar(indices, deltas, color='#ff7c43', width=0.5)
+        for i in range(len(deltas)):
+            plt.annotate(prettify_delta(deltas[i]), xy=(indices[i], deltas[i]), ha='center', va='bottom')
         plt.xticks(indices, descriptions)
         plt.ylabel('Time in seconds')
         plt.xlabel('Run description')
-        plt.savefig('chart_for_test_' + test + '.png')
+        plt.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.5)
+        plt.title('Time distribution for test ' + test + ' (with different run parameters)')
+        plt.savefig('outputs/charts/chart_for_test_' + test + '.png')
         plt.close()
 
 if __name__ == '__main__':
