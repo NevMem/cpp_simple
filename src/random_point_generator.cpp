@@ -25,8 +25,8 @@ private:
     static Point generatePointInBoundingBox(const BoundingBox& b)
     {
         static constexpr double MAX_VALUE = static_cast<long long>(RAND_MAX) * RAND_MAX;
-        double x_d = ((rand() * RAND_MAX) + rand()) / MAX_VALUE;
-        double y_d = ((rand() * RAND_MAX) + rand()) / MAX_VALUE;
+        double x_d = (static_cast<long long>(rand()) * RAND_MAX + rand()) / MAX_VALUE;
+        double y_d = (static_cast<long long>(rand()) * RAND_MAX + rand()) / MAX_VALUE;
         return Point {
             b.bottomLeft.x + x_d * (b.topRight.x - b.bottomLeft.x),
             b.bottomLeft.y + y_d * (b.topRight.y - b.bottomLeft.y)
