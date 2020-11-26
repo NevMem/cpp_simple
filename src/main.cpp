@@ -1,69 +1,118 @@
-#include <iostream>
-#include <vector>
-#include <thread>
+#include <cassert>
 #include <functional>
-#include <set>
 #include <future>
+#include <iostream>
+#include <optional>
+#include <set>
+#include <thread>
+#include <vector>
 
-#include <threading/dispatcher/dispatchers.h>
-#include <singleton/singleton.h>
+#include <mpi_adapter/mpi_adapter.h>
+#include <mpi_adapter/mpi_adapter_creators.h>
 
-class SomeClass {
+#include "message.h"
+#include "solution.h"
+
+class DataAccessorImpl final : public DataAccessor {
 public:
-    std::string getMessage()
+    DataAccessorImpl(const std::shared_ptr<mpi_adapter::MpiAdapter>& adapter, int myFromIndex, int myToIndex)
+    : adapter_(adapter)
+    , myFromIndex_(myFromIndex)
+    , myToIndex_(myToIndex)
+    {}
+
+    virtual double getValueByIndex(int index) override
     {
-        accesses_ += 1;
-        return "Accesses: " + std::to_string(accesses_);
+        assert(index < myFromIndex_ || myToIndex_ < index);
+        if (index == -1) {
+            return 0;
+        }
+        if (index > myToIndex_ && adapter_->worldSize() == adapter_->rank() + 1) {
+            return 0;
+        }
+        if (index < myFromIndex_) {
+            return adapter_->receive<Value>(adapter_->rank() - 1, Value::messageTag).value;
+        }
+        return adapter_->receive<Value>(adapter_->rank() + 1, Value::messageTag).value;
     }
 
 private:
-    int accesses_ = 0;
+    const std::shared_ptr<mpi_adapter::MpiAdapter> adapter_;
+    const int myFromIndex_;
+    const int myToIndex_;
 };
 
-class MyException : public std::exception {
+class DataProviderImpl final : public DataProvider {
 public:
-    virtual const char* what() const noexcept override
+    DataProviderImpl(const std::shared_ptr<mpi_adapter::MpiAdapter>& adapter, int myFromIndex, int myToIndex)
+    : adapter_(adapter)
+    , myFromIndex_(myFromIndex)
+    , myToIndex_(myToIndex)
+    {}
+
+    virtual void provideDataAt(int index, double value) override
     {
-        return "My exception";
+        assert(index == myFromIndex_ || myToIndex_ == index);
+        if (index == 0) {
+            return;
+        }
+        if (index == myToIndex_ && adapter_->worldSize() == adapter_->rank() + 1) {
+            return;
+        }
+        if (index == myFromIndex_) {
+            return adapter_->send<Value>(Value(value), adapter_->rank() - 1, Value::messageTag);
+        }
+        return adapter_->send<Value>(Value(value), adapter_->rank() + 1, Value::messageTag);
     }
+
+private:
+    const std::shared_ptr<mpi_adapter::MpiAdapter> adapter_;
+    const int myFromIndex_;
+    const int myToIndex_;
 };
 
 int main() {
-    const size_t num_threads = 1000;
-    size_t globSum = 0;
-    std::mutex mutex;
+    auto mpi = mpi_adapter::createDefaultMpiAdapter();
+    mpi->init();
 
-    auto start = std::chrono::high_resolution_clock::now();
-    std::vector<std::future<size_t>> futures;
+    if (mpi->isMaster()) {
+        const double start = 0;
+        const double finish = 1;
+        const double pointDelta = 0.02;
+        const double timeDelta = 0.0002;
+        const size_t iterationsCount = 0.1 / timeDelta;
 
-    size_t check = 0;
+        const int countPoints = (finish - start) / pointDelta + 1;
 
-    for (size_t i = 0; i != num_threads; ++i) {
-        auto future = threading::dispatcher::computation()->async([](size_t a, size_t& kek) -> size_t {
-            size_t sum = 0;
-            if (a == 15) {
-                throw MyException();
-            }
-            for (size_t i = a * 100000; i != (a + 1) * 100000; ++i) {
-                sum += i;
-            }
-            kek += 1;
-            return sum;
-        }, i, std::ref(check));
-        futures.push_back(std::move(future));
-    }
+        const int executors = mpi->worldSize();
+        std::vector<Task> tasks;
+        tasks.reserve(executors);
 
-    std::cout << check << std::endl;
-    
-    for (auto& future : futures) {
-        try {
-            globSum += future.get();
-        } catch (const MyException& exception) {
-            std::cout << "exception what: " << exception.what() << std::endl;
+        for (size_t i = 0; i != executors; ++i) {
+            const int fromPoint = countPoints / executors * i;
+            const int toPoint = i == executors - 1
+                ? countPoints - 1
+                : fromPoint + countPoints / executors - 1;
+            const double from = start + pointDelta * fromPoint;
+            const double to = start + pointDelta * toPoint;
+            tasks.push_back(Task { from, to, fromPoint, toPoint, timeDelta, pointDelta, iterationsCount, 1.0 });
+        }
+
+        for (size_t i = 0; i != tasks.size(); ++i) {
+            mpi->send(tasks[i], i, Task::messageTag);
         }
     }
 
-    auto finish = std::chrono::high_resolution_clock::now();
-    std::cout << globSum << std::endl;
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() << std::endl;
+    Task myTask = mpi->receive<Task>(0, Task::messageTag);
+
+    std::cout << myTask.fromIndex << " " << myTask.toIndex << " " << myTask.fromPoint << " " << myTask.toPoint << " " << myTask.iterationsCount << std::endl;
+
+    auto solution = createDefaultSolution();
+    auto result = solution->run(
+        myTask,
+        std::make_shared<DataAccessorImpl>(mpi, myTask.fromIndex, myTask.toIndex),
+        std::make_shared<DataProviderImpl>(mpi, myTask.fromIndex, myTask.toIndex));
+    for (const auto& elem : result) {
+        std::cout << elem.pointIndex << " " << elem.point << " " << elem.result << std::endl;
+    }
 }

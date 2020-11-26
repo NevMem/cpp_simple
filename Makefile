@@ -123,6 +123,33 @@ result.o/fast:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/build
 .PHONY : result.o/fast
 
+src/impl/mpi_adapter/default_mpi_adapter.o: src/impl/mpi_adapter/default_mpi_adapter.cpp.o
+
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.o
+
+# target to build an object file
+src/impl/mpi_adapter/default_mpi_adapter.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/mpi_adapter/default_mpi_adapter.cpp.o
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.cpp.o
+
+src/impl/mpi_adapter/default_mpi_adapter.i: src/impl/mpi_adapter/default_mpi_adapter.cpp.i
+
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.i
+
+# target to preprocess a source file
+src/impl/mpi_adapter/default_mpi_adapter.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/mpi_adapter/default_mpi_adapter.cpp.i
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.cpp.i
+
+src/impl/mpi_adapter/default_mpi_adapter.s: src/impl/mpi_adapter/default_mpi_adapter.cpp.s
+
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.s
+
+# target to generate assembly for a file
+src/impl/mpi_adapter/default_mpi_adapter.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/impl/mpi_adapter/default_mpi_adapter.cpp.s
+.PHONY : src/impl/mpi_adapter/default_mpi_adapter.cpp.s
+
 src/impl/threading/dispatcher/single_thread_dispatcher.o: src/impl/threading/dispatcher/single_thread_dispatcher.cpp.o
 
 .PHONY : src/impl/threading/dispatcher/single_thread_dispatcher.o
@@ -231,6 +258,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/solution.o: src/solution.cpp.o
+
+.PHONY : src/solution.o
+
+# target to build an object file
+src/solution.cpp.o:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/solution.cpp.o
+.PHONY : src/solution.cpp.o
+
+src/solution.i: src/solution.cpp.i
+
+.PHONY : src/solution.i
+
+# target to preprocess a source file
+src/solution.cpp.i:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/solution.cpp.i
+.PHONY : src/solution.cpp.i
+
+src/solution.s: src/solution.cpp.s
+
+.PHONY : src/solution.s
+
+# target to generate assembly for a file
+src/solution.cpp.s:
+	$(MAKE) -f CMakeFiles/result.o.dir/build.make CMakeFiles/result.o.dir/src/solution.cpp.s
+.PHONY : src/solution.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -240,6 +294,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... result.o"
+	@echo "... src/impl/mpi_adapter/default_mpi_adapter.o"
+	@echo "... src/impl/mpi_adapter/default_mpi_adapter.i"
+	@echo "... src/impl/mpi_adapter/default_mpi_adapter.s"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.o"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.i"
 	@echo "... src/impl/threading/dispatcher/single_thread_dispatcher.s"
@@ -252,6 +309,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/solution.o"
+	@echo "... src/solution.i"
+	@echo "... src/solution.s"
 .PHONY : help
 
 
