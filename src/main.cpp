@@ -71,9 +71,18 @@ private:
     const int myToIndex_;
 };
 
+struct RunParams {
+    double start;
+    double finish;
+    size_t iterationsCount;
+    int countPoints;
+};
+
 int main() {
     auto mpi = mpi_adapter::createDefaultMpiAdapter();
     mpi->init();
+
+    std::unique_ptr<RunParams> params;
 
     if (mpi->isMaster()) {
         const double start = 0;
@@ -83,6 +92,8 @@ int main() {
         const size_t iterationsCount = 0.1 / timeDelta;
 
         const int countPoints = (finish - start) / pointDelta + 1;
+
+        params = std::make_unique<RunParams>(RunParams { start, finish, iterationsCount, countPoints });
 
         const int executors = mpi->worldSize();
         std::vector<Task> tasks;
@@ -111,7 +122,24 @@ int main() {
         std::make_shared<DataAccessorImpl>(mpi, myTask.fromIndex, myTask.toIndex),
         std::make_shared<DataProviderImpl>(mpi, myTask.fromIndex, myTask.toIndex));
 
-    for (const auto& elem : result) {
-        mpi->send(ResultStreamEntity { elem.point, elem.result, elem.pointIndex }, mpi->masterRank(), ResultStreamEntity::messageTag);        
+    if (!mpi->isMaster()) {
+        for (const auto& elem : result) {
+            mpi->send(
+                ResultStreamEntity { elem.point, elem.result, elem.pointIndex },
+                mpi->masterRank(),
+                ResultStreamEntity::messageTag);        
+        }
+    } else {
+        const auto remCount = params->countPoints - result.size();
+        for (size_t i = 0; i != remCount; ++i) {
+            auto entity = mpi->receiveFromAny<ResultStreamEntity>(ResultStreamEntity::messageTag);
+            result.push_back(AtIndexResult { entity.index, entity.point, entity.value });
+        }
+        std::sort(result.begin(), result.end(), [](const auto& first, const auto& second) {
+            return first.point < second.point;
+        });
+        for (const auto& elem : result) {
+            std::cout << elem.point << " " << elem.result << std::endl;
+        }
     }
 }

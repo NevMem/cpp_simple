@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mpi.h>
+
 namespace mpi_adapter {
 
 class MpiAdapter {
@@ -24,6 +26,12 @@ public:
         T result = *reinterpret_cast<const T*>(received.data);
         delete[] received.data;
         return result;
+    }
+
+    template<typename T>
+    T receiveFromAny(int tag)
+    {
+        return receive<T>(MPI_ANY_SOURCE, tag);
     }
 
     virtual int masterRank() const = 0;
