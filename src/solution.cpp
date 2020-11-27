@@ -49,7 +49,7 @@ public:
         result.reserve(totalPoints);
         for (size_t i = 0; i != totalPoints; ++i) {
             const double point = task.fromPoint + (task.toPoint - task.fromPoint) * i / (totalPoints - 1);
-            result.push_back(AtIndexResult { task.fromIndex + i, point, INITIAL_VALUE });
+            result.push_back(AtIndexResult { static_cast<int>(task.fromIndex + i), point, INITIAL_VALUE });
         }
 
         const auto compositeDataAccessor = std::make_shared<CompositeDataAccessor>(dataAccessor, dataProvider);

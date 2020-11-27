@@ -50,3 +50,18 @@ struct Value : Message<1> {
 
     double value;
 };
+
+struct ResultStreamEntity : Message<2> {
+    ResultStreamEntity()
+    {}
+
+    ResultStreamEntity(double p, double v, int i)
+    : point(p)
+    , value(v)
+    , index(i)
+    {}
+
+    double point;
+    double value;
+    int index;
+};

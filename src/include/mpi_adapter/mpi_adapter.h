@@ -26,6 +26,8 @@ public:
         return result;
     }
 
+    virtual int masterRank() const = 0;
+
     virtual void init() = 0;
     virtual void finalize() = 0;
 

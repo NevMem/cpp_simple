@@ -105,14 +105,13 @@ int main() {
 
     Task myTask = mpi->receive<Task>(0, Task::messageTag);
 
-    std::cout << myTask.fromIndex << " " << myTask.toIndex << " " << myTask.fromPoint << " " << myTask.toPoint << " " << myTask.iterationsCount << std::endl;
-
     auto solution = createDefaultSolution();
     auto result = solution->run(
         myTask,
         std::make_shared<DataAccessorImpl>(mpi, myTask.fromIndex, myTask.toIndex),
         std::make_shared<DataProviderImpl>(mpi, myTask.fromIndex, myTask.toIndex));
+
     for (const auto& elem : result) {
-        std::cout << elem.pointIndex << " " << elem.point << " " << elem.result << std::endl;
+        mpi->send(ResultStreamEntity { elem.point, elem.result, elem.pointIndex }, mpi->masterRank(), ResultStreamEntity::messageTag);        
     }
 }

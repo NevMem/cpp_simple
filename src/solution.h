@@ -8,7 +8,7 @@
 #include <vector>
 
 struct AtIndexResult {
-    size_t pointIndex;
+    int pointIndex;
     double point;
     double result;
 };
