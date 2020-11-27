@@ -48,7 +48,7 @@ public:
         const size_t totalPoints = task.toIndex - task.fromIndex + 1;
         result.reserve(totalPoints);
         for (size_t i = 0; i != totalPoints; ++i) {
-            const double point = task.fromPoint + (task.toPoint - task.fromPoint) * i / totalPoints;
+            const double point = task.fromPoint + (task.toPoint - task.fromPoint) * i / (totalPoints - 1);
             result.push_back(AtIndexResult { task.fromIndex + i, point, INITIAL_VALUE });
         }
 
