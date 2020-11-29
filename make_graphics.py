@@ -55,6 +55,20 @@ def run_solution_with_processes_and_params(proc_num: int, params: RunParams, par
     else:
         return RunResults(delta)
 
+def generate_run_params_for_count_of_points(count: int) -> RunParams:
+    length = 1.0
+    start = 0.0
+    finish = start + length
+    point_delta = length / count
+
+    time_delta = point_delta ** 2 * 0.9
+
+    iterations_count = 200
+
+    T = time_delta * iterations_count
+
+    return RunParams(start=start, finish=finish, point_delta=point_delta, time_delta=time_delta, time=T)
+
 def main():
     generate_cmake()
     make()
@@ -68,6 +82,33 @@ def main():
     plt.ylabel('Temperature')
     plt.legend()
     plt.savefig('comparison.png')
+    plt.close()
+
+    processors = [1, 2, 4, 8, 16]
+    points_counts = [2000, 10000, 50000]
+
+    times = []
+    procs = []
+    labels = ['Count of points ' + str(count) for count in points_counts]
+    names = [str(count) for count in points_counts]
+
+    for count_of_points in points_counts:
+        times.append([])
+        procs.append([])
+        for proc_count in processors:
+            result = run_solution_with_processes_and_params(proc_count, generate_run_params_for_count_of_points(count_of_points))
+            times[-1].append(result.run_time)
+            procs[-1].append(proc_count)
+
+    plt.figure(figsize=(10, 4))
+    for x, y, label, name in zip(procs, times, labels, names):
+        plt.plot(x, y, label=label)
+        plt.xlabel('Num of processors')
+        plt.ylabel('Time in seconds')
+        plt.legend()
+        plt.savefig('graph_' + name + '.png')
+        plt.close()
+    
 
 if __name__ == '__main__':
     main()
