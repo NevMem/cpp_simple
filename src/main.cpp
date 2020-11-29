@@ -1,4 +1,5 @@
 #include <cassert>
+#include <fstream>
 #include <functional>
 #include <future>
 #include <iostream>
@@ -85,12 +86,18 @@ int main() {
     std::unique_ptr<RunParams> params;
 
     if (mpi->isMaster()) {
-        const double start = 0;
-        const double finish = 1;
-        const double pointDelta = 0.02;
-        const double timeDelta = 0.0002;
-        const size_t iterationsCount = 0.1 / timeDelta;
+        double start, finish;
+        double pointDelta, timeDelta;
+        double time;
+        
+        {
+            std::ifstream fin("input.txt");
+            fin >> start >> finish;
+            fin >> pointDelta >> timeDelta;
+            fin >> time;
+        }
 
+        const size_t iterationsCount = time / timeDelta;
         const int countPoints = (finish - start) / pointDelta + 1;
 
         params = std::make_unique<RunParams>(RunParams { start, finish, iterationsCount, countPoints });
