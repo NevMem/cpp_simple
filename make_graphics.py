@@ -1,5 +1,6 @@
 from precise import precise_solution_for_11_points
 import matplotlib.pyplot as plt
+import numpy as np
 import subprocess as sp
 import time
 import typing
@@ -63,11 +64,27 @@ def generate_run_params_for_count_of_points(count: int) -> RunParams:
 
     time_delta = point_delta ** 2 * 0.9
 
-    iterations_count = 200
+    iterations_count = 1000
 
     T = time_delta * iterations_count
 
     return RunParams(start=start, finish=finish, point_delta=point_delta, time_delta=time_delta, time=T)
+
+def calcullate_diff(real_x, real_y, my_x, my_y):
+    y = []
+    for x in real_x:
+        min_diff = 10 ** 9
+        index = 0
+        for i in range(len(my_x)):
+            if min_diff > abs(my_x[i] - x):
+                min_diff = abs(my_x[i] - x)
+                index = i
+        y.append(my_y[index])
+    y = np.array(y)
+    diff = y - real_y
+    print('Diff by points:    ', list(diff))
+    print('Mean square error: ', np.mean(diff ** 2))
+    print('Abs error:    ', np.sum(abs(diff)))
 
 def main():
     generate_cmake()
@@ -83,6 +100,8 @@ def main():
     plt.legend()
     plt.savefig('comparison.png')
     plt.close()
+
+    calcullate_diff(real_x, real_y, result.x, result.y)
 
     processors = [1, 2, 4, 8, 16]
     points_counts = [2000, 10000, 50000]
