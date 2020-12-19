@@ -38,7 +38,7 @@ def read_image(text, image):
 
 
 def main():
-    get_RGB('image.tiff', 'iamge_converted.txt')
+    get_RGB('image.tiff', 'image_converted.txt')
 
 if __name__ == '__main__':
     main()
