@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 
 
-def get_RGB(image,text):
+def get_RGB(image, text):
     img = Image.open(image)
     rgbimg = img.convert('RGB')
     A = []
@@ -21,7 +21,7 @@ def get_RGB(image,text):
     file1.close()
 
     
-def read_image(text,image):
+def read_image(text, image):
     file = open(text,"r")
     w,h = map(int,file.readline().split())
     A = []
@@ -38,7 +38,7 @@ def read_image(text,image):
 
 
 def main():
-    pass
+    get_RGB('image.tiff', 'iamge_converted.txt')
 
 if __name__ == '__main__':
     main()

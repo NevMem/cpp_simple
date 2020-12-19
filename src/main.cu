@@ -105,9 +105,9 @@ __global__ void saxpy(int n, float a, float *x, float *y)
     if (i < n) y[i] = a * x[i] + y[i];
 }
 
-int main(void)
+int main(int argc, char** argv)
 {
-    int N = 1 << 20;
+    /* int N = 1 << 20;
     TypeArrayWrapper<float> x(N, 0), y(N, 0);
 
     for (int i = 0; i < N; i++) {
@@ -127,5 +127,5 @@ int main(void)
     for (int i = 0; i < N; i++) {
         maxError = max(maxError, abs(y[i] - 4.0f));
     }
-    printf("Max error: %f\n", maxError);
+    printf("Max error: %f\n", maxError); */
 }
