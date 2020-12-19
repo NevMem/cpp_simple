@@ -3,3 +3,13 @@ CMakeFiles/**
 CMakeCache.txt
 cmake_install.cmake
 *.o
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+ZERO_CHECK.vcxproj
+ZERO_CHECK.vcxproj.filters
+main.sln
+result.vcxproj
+result.vcxproj.filters
+Debug/**
+result.dir/**
+x64/**
