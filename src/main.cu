@@ -121,7 +121,6 @@ int main(void)
     // Perform SAXPY on 1M elements
     saxpy<<<(N+255)/256, 256>>>(N, 2.0f, x.deviceData(), y.deviceData());
 
-    /*cudaMemcpy(y, d_y, N*sizeof(float), cudaMemcpyDeviceToHost);*/
     y.toHost();
 
     float maxError = 0.0f;
