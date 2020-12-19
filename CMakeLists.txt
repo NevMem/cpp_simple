@@ -12,4 +12,4 @@ file(
     src/*.cu
 )
 
-add_executable(result.o ${SOURCES})
+add_executable(result ${SOURCES})
