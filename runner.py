@@ -70,19 +70,32 @@ def read_image(text, image):
     new_im.save(image)
 
 
+class Converter:
+    def convert(self, image_name: str) -> str:
+        """
+        Converts image to txt file
+        Uses cache to prevent long operation each time
+        """
+        name = image_name.split('.')[0]
+        convert_name = name + '.txt'
+        if os.path.exists(convert_name):
+            return convert_name
+        get_RGB(image_name, convert_name)
+        return convert_name
+
+
 def main():
-    converted_image_name = 'image_converted.txt'
-    if not os.path.exists(converted_image_name):
-        get_RGB('image.tiff', converted_image_name)
-        print('Converted!')
-    else:
-        print('Used cached conversion!')
+    images = ['image_qhd.tiff', 'image_4k.tiff', 'image_8k.tiff']
+
+    converter = Converter()
+
     run_cmake()
-    print('Cmake succeeed!')
     filename = build(is_debug=False)
-    output = run(filename, [converted_image_name])
-    print('Done!')
-    read_image(output, 'result.tiff')
+
+    for image in images:
+        converted = converter.convert(image)
+        output = run(filename, [converted])
+        read_image(output, image.split('.')[0] + '_result.tiff')
 
 if __name__ == '__main__':
     main()
