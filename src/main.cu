@@ -238,6 +238,37 @@ std::vector<int> applyTransform(std::vector<int> pixels, size_t height, size_t w
     return result.asVector();
 }
 
+
+std::vector<int> applyTrnasformOnCPU(std::vector<int> pixels, size_t height, size_t width, size_t maskSize)
+{
+    const auto matrix = createTransformMatrix(maskSize);
+    std::vector<int> result;
+    result.resize(pixels.size(), 0);
+
+    for (size_t index = 0; index != result.size(); ++index) {
+        const int i = index / width;
+        const int j = index - i * width;
+        if (i < height && j < width) {
+            const int pad = maskSize / 2;
+            if (pad <= i && pad <= j && i < height - pad && j < width - pad) {
+                float sum = 0;
+                for (int dx = -pad; dx <= pad; ++dx) {
+                    for (int dy = -pad; dy <= pad; ++dy) {
+                        const int maskIndex = (dx + pad) * maskSize + dy + pad;
+                        const int fromIndex = (i + dx) * width + (j + dy);
+                        sum += matrix[maskIndex] * pixels[fromIndex];
+                    }
+                }
+                result[i * width + j] = sum;
+            } else {
+                result[i * width + j] = pixels[i * width + j];
+            }
+        }
+    }
+
+    return result;
+}
+
 class Timer {
 public:
     Timer(const std::string& tag)
@@ -258,16 +289,23 @@ private:
 
 int main(int argc, char** argv)
 {
-    assert(argc > 1);
+    assert(argc > 3);
+    
     const std::string filename = argv[1];
     std::ifstream fin(filename);
+
+    const std::string mode = argv[2];
+    assert(mode == "cuda" || mode == "cpu");
+
+    const std::string kernelSize = argv[3];
+    const size_t kernel = atoi(kernelSize.c_str());
+    assert(kernel % 2 == 1);
+    const size_t padding = kernel / 2;
 
     size_t height, width;
     fin >> height >> width;
 
     std::cout << height << ' ' << width << '\n';
-
-    size_t padding = 10;
 
     for (const auto& channel : {0, 1, 2}) {
         std::vector<int> pixels;
@@ -285,10 +323,21 @@ int main(int argc, char** argv)
             Timer timer("Adding padding");
             pixels = addPadding(std::move(pixels), height, width, padding);
         }
-        for (int i = 0; i != 100; ++i)
-        {
+        for (int i = 0; i != 10; ++i) {
             Timer timer("Transforming");
-            pixels = applyTransform(std::move(pixels), height + padding * 2, width + padding * 2, padding * 2 + 1);
+            if (mode == "cuda") {
+                pixels = applyTransform(
+                    std::move(pixels),
+                    height + padding * 2,
+                    width + padding * 2,
+                    padding * 2 + 1);
+            } else {
+                pixels = applyTrnasformOnCPU(
+                    std::move(pixels),
+                    height + padding * 2,
+                    width + padding * 2,
+                    padding * 2 + 1);
+            }
         }
         {
             Timer timer("Removing padding");

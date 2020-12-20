@@ -1,7 +1,9 @@
 from PIL import Image
+import json
+import matplotlib.pyplot as plt
 import numpy as np
-import subprocess as sp
 import os
+import subprocess as sp
 
 
 def run_cmake():
@@ -26,13 +28,14 @@ def build(is_debug=True) -> str:
 
 def run(file, args) -> str:
     output_filename = 'output.txt'
+    log_filename = 'log.txt'
     process = sp.Popen(
         [file, *args],
         stdout=open(output_filename, 'w'),
-        stderr=open('log.txt', 'w'))
+        stderr=open(log_filename, 'w'))
     process.wait()
     assert process.returncode == 0
-    return output_filename
+    return output_filename, log_filename
 
 
 def get_RGB(image, text):
@@ -86,18 +89,56 @@ class Converter:
         return convert_name
 
 
+def read_log(log_filename):
+    transforming_time = 0
+    count_trnasforms = 0
+    with open(log_filename, 'r') as inp:
+        for line in inp.readlines():
+            split = line.split()
+            if split[0] == '[Transforming]':
+                transforming_time += int(split[1])
+                count_trnasforms += 1
+    return transforming_time / count_trnasforms
+
+
 def main():
-    images = ['image_qhd.tiff', 'image_4k.tiff', 'image_8k.tiff']
+    images = ['image_720p.tiff', 'image_fullhd.tiff', 'image_qhd.tiff', 'image_4k.tiff']
 
     converter = Converter()
 
     run_cmake()
     filename = build(is_debug=False)
 
+    for_graphs = dict()
+    sizes = [1, 3, 5, 7, 11, 17, 29, 31]
+
+    with open('graphs.json', 'r') as inp:
+        for_graphs = json.loads(inp.read())
+
     for image in images:
         converted = converter.convert(image)
-        output = run(filename, [converted])
+        for mode in ['cpu', 'cuda']:
+            for size in sizes:
+                output, log_file = run(filename, [converted, mode, str(size)])
+                transforming_time = read_log(log_file)
+                label = mode + ' ' + image
+                if label not in for_graphs:
+                    for_graphs[label] = []
+                for_graphs[label].append(transforming_time)
+                print(label, transforming_time)
         read_image(output, image.split('.')[0] + '_result.tiff')
+
+    with open('graphs.json', 'w') as out:
+        out.write(json.dumps(for_graphs))
+
+    plt.figure(figsize=(14, 10))
+    for label in for_graphs:
+        plt.plot(sizes, for_graphs[label], label=label)
+    plt.xlabel('Kernel size')
+    plt.ylabel('Milliseconds on transformation')
+    plt.legend()
+    plt.savefig('graphics.png')
+
 
 if __name__ == '__main__':
     main()
