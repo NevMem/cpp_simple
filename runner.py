@@ -39,8 +39,10 @@ def get_RGB(image, text):
     img = Image.open(image)
     rgbimg = img.convert('RGB')
     A = []
-    for i in range(np.shape(rgbimg)[0]):
-        for j in range(np.shape(rgbimg)[1]):
+    height = np.shape(rgbimg)[0]
+    width = np.shape(rgbimg)[1]
+    for i in range(height):
+        for j in range(width):
             A.append(rgbimg.getpixel((j,i)))
     A = np.array(A)
     file1 = open(text,"w")
