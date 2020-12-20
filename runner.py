@@ -108,6 +108,7 @@ def main():
 
     run_cmake()
     filename = build(is_debug=False)
+    # filename = 'executable.o'
 
     for_graphs = dict()
     sizes = [1, 3, 5, 7, 11, 17, 29, 31]
