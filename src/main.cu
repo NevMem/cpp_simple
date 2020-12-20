@@ -190,7 +190,13 @@ std::vector<float> createTransformMatrix(size_t size)
     return result;
 }
 
-__global__ void transform(const int height, const int width, const int maskSize, const int* const from, int* const to, const float* const mask)
+__global__ void transform(
+    const int height,
+    const int width,
+    const int maskSize,
+    const int* const from,
+    int* const to,
+    const float* const mask)
 {
     const int index = blockIdx.x * blockDim.x + threadIdx.x;
     const int i = index / width;
