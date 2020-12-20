@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <string>
 
 template <typename T>
 class TypeArrayWrapper {
@@ -62,6 +66,17 @@ public:
         return data_[index];
     }
 
+    std::vector<T> asVector()
+    {
+        assert(!onDevice_);
+        std::vector<T> result;
+        result.resize(size_);
+        for (size_t i = 0; i != size_; ++i) {
+            result[i] = data_[i];
+        }
+        return result;
+    }
+
     void clear()
     {
         clearAll();
@@ -99,33 +114,189 @@ private:
     bool onDevice_ = false;
 };
 
-__global__ void saxpy(int n, float a, float *x, float *y)
+std::vector<int> addPadding(std::vector<int> pixels, size_t height, size_t width, size_t padding)
 {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) y[i] = a * x[i] + y[i];
+    const auto coordPrev = [&height, &width](const size_t i, const size_t j) -> size_t {
+        return i * width + j;
+    };
+    const auto coordNew = [&height, &width, &padding](const size_t i, const size_t j) -> size_t {
+        return i * (width + padding * 2) + j;
+    };
+
+    std::vector<int> result;
+    result.resize((height + padding * 2) * (width + padding * 2));
+    for (size_t i = 0; i != height + padding * 2; ++i) {
+        for (size_t j = 0; j != width + padding * 2; ++j) {
+            if (padding <= i && padding <= j && i < height + padding && j < width + padding) {
+                result[coordNew(i, j)] = pixels[coordPrev(i - padding, j - padding)];
+            } else if (i < padding) {
+                size_t coordJ = j < padding
+                    ? 0
+                    : (j >= width + padding ? width - 1 : j - padding);
+                result[coordNew(i, j)] = pixels[coordPrev(0, coordJ)];
+            } else if (i >= height + padding) {
+                size_t coordJ = j < padding
+                    ? 0
+                    : (j >= width + padding ? width - 1 : j - padding);
+                result[coordNew(i, j)] = pixels[coordPrev(height - 1, coordJ)];
+            } else {
+                result[coordNew(i, j)] = pixels[coordPrev(i - padding, j < padding ? 0 : width - 1)];
+            }
+        }
+    }
+    return result;
 }
+
+std::vector<int> removePadding(std::vector<int> pixels, size_t height, size_t width, size_t padding)
+{
+    const auto coordPrev = [&height, &width](const size_t i, const size_t j) -> size_t {
+        return i * width + j;
+    };
+    const auto coordNew = [&height, &width, &padding](const size_t i, const size_t j) -> size_t {
+        return i * (width - padding * 2) + j;
+    };
+
+    std::vector<int> result;
+    result.resize((height - padding * 2) * (width - padding * 2));
+    for (size_t i = 0; i != height; ++i) {
+        for (size_t j = 0; j != width; ++j) {
+            if (padding <= i && padding <= j && i < height - padding && j < width - padding) {
+                result[coordNew(i - padding, j - padding)] = pixels[coordPrev(i, j)];
+            }
+        }
+    }
+    return result;
+}
+
+std::vector<float> createTransformMatrix(size_t size)
+{
+    assert(size % 2 == 1);
+    int p = size / 2;
+    float sigma = 1;
+    std::vector<float> result;
+    result.reserve(size * size);
+    for (int x = -p; x <= p; ++x) {
+        for (int y = -p; y <= p; ++y) {
+            result.push_back(exp(-(x * x + y * y) / (2 * sigma * sigma)));
+        }
+    }
+    float sum = 0;
+    for (const auto& elem : result) {
+        sum += elem;
+    }
+    for (auto& elem : result) {
+        elem /= sum;
+    }
+    return result;
+}
+
+__global__ void transform(const int height, const int width, const int maskSize, const int* const from, int* const to, const float* const mask)
+{
+    const int index = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i = index / width;
+    const int j = index - i * width;
+    if (i < height && j < width) {
+        const int pad = maskSize / 2;
+        if (pad <= i && pad <= j && i < height - pad && j < width - pad) {
+            float sum = 0;
+            for (int dx = -pad; dx <= pad; ++dx) {
+                for (int dy = -pad; dy <= pad; ++dy) {
+                    const int maskIndex = (dx + pad) * maskSize + dy + pad;
+                    const int fromIndex = (i + dx) * width + (j + dy);
+                    sum += mask[maskIndex] * from[fromIndex];
+                }
+            }
+            to[i * width + j] = sum;
+        } else {
+            to[i * width + j] = from[i * width + j];
+        }
+    }
+}
+
+std::vector<int> applyTransform(std::vector<int> pixels, size_t height, size_t width, size_t maskSize)
+{
+    const auto matrix = createTransformMatrix(maskSize);
+
+    TypeArrayWrapper matr(matrix);
+    matr.toDevice();
+
+    TypeArrayWrapper data(pixels);
+    data.toDevice();
+
+    TypeArrayWrapper<int> result(pixels.size(), 0);
+    result.toDevice();
+
+    transform<<<(width * height + 511) / 512, 512>>>(height, width, maskSize, data.deviceData(), result.deviceData(), matr.deviceData());
+
+    result.toHost();
+    return result.asVector();
+}
+
+class Timer {
+public:
+    Timer(const std::string& tag)
+    : tag_(tag)
+    , start_(std::chrono::high_resolution_clock::now())
+    {}
+
+    ~Timer()
+    {
+        const auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_).count();
+        std::cerr << "[" << tag_ << "] " << diff << std::endl;
+    }
+
+private:
+    const std::string tag_;
+    const std::chrono::steady_clock::time_point start_;
+};
 
 int main(int argc, char** argv)
 {
-    /* int N = 1 << 20;
-    TypeArrayWrapper<float> x(N, 0), y(N, 0);
+    assert(argc > 1);
+    const std::string filename = argv[1];
+    std::ifstream fin(filename);
 
-    for (int i = 0; i < N; i++) {
-        x[i] = 1.0f;
-        y[i] = 2.0f;
+    size_t height, width;
+    fin >> height >> width;
+
+    std::cout << height << ' ' << width << '\n';
+
+    size_t padding = 10;
+
+    for (const auto& channel : {0, 1, 2}) {
+        std::vector<int> pixels;
+        {
+            Timer timer("Reading channel " + std::to_string(channel));
+            for (size_t i = 0; i != height; ++i) {
+                for (size_t j = 0; j != width; ++j) {
+                    int value;
+                    fin >> value;
+                    pixels.push_back(value);
+                }
+            }
+        }
+        {
+            Timer timer("Adding padding");
+            pixels = addPadding(std::move(pixels), height, width, padding);
+        }
+        for (int i = 0; i != 100; ++i)
+        {
+            Timer timer("Transforming");
+            pixels = applyTransform(std::move(pixels), height + padding * 2, width + padding * 2, padding * 2 + 1);
+        }
+        {
+            Timer timer("Removing padding");
+            pixels = removePadding(std::move(pixels), height + padding * 2, width + padding * 2, padding);
+        }
+
+        {
+            Timer("Writing channel " + std::to_string(channel));
+            for (size_t i = 0; i != height; ++i) {
+                for (size_t j = 0; j != width; ++j) {
+                    std::cout << pixels[i * width + j] << ' ';
+                }
+                std::cout << '\n';
+            }
+        }
     }
-
-    x.toDevice();
-    y.toDevice();
-
-    // Perform SAXPY on 1M elements
-    saxpy<<<(N+255)/256, 256>>>(N, 2.0f, x.deviceData(), y.deviceData());
-
-    y.toHost();
-
-    float maxError = 0.0f;
-    for (int i = 0; i < N; i++) {
-        maxError = max(maxError, abs(y[i] - 4.0f));
-    }
-    printf("Max error: %f\n", maxError); */
 }

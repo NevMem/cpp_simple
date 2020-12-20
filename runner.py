@@ -1,5 +1,38 @@
 from PIL import Image
 import numpy as np
+import subprocess as sp
+import os
+
+
+def run_cmake():
+    process = sp.Popen(['cmake', '.'], stdout=sp.PIPE)
+    process.wait()
+    assert process.returncode == 0
+
+
+def build(is_debug=True) -> str:
+    print('Building')
+    configuration = 'Debug'
+    if not is_debug:
+        configuration = 'Release'
+    ret = sp.call(
+        ['msbuild', 'main.sln', '/property:Configuration={}'.format(configuration)])
+    assert ret == 0
+    print('Built!')
+    if is_debug:
+        return 'Debug/result.exe'
+    return 'Release/result.exe'
+
+
+def run(file, args) -> str:
+    output_filename = 'output.txt'
+    process = sp.Popen(
+        [file, *args],
+        stdout=open(output_filename, 'w'),
+        stderr=open('log.txt', 'w'))
+    process.wait()
+    assert process.returncode == 0
+    return output_filename
 
 
 def get_RGB(image, text):
@@ -23,7 +56,7 @@ def get_RGB(image, text):
     
 def read_image(text, image):
     file = open(text,"r")
-    w,h = map(int,file.readline().split())
+    w,h = map(int, file.readline().split())
     A = []
     for i in range(3):
         B = []
@@ -31,14 +64,25 @@ def read_image(text, image):
             B.append(list(map(np.uint8,file.readline().split())))
         A.append(B)
     A = np.array(A)
-    A = A.transpose(1,2,0)
+    A = A.transpose(1, 2, 0)
     file.close()
-    new_im = Image.fromarray(A,'RGB')
+    new_im = Image.fromarray(A, 'RGB')
     new_im.save(image)
 
 
 def main():
-    get_RGB('image.tiff', 'image_converted.txt')
+    converted_image_name = 'image_converted.txt'
+    if not os.path.exists(converted_image_name):
+        get_RGB('image.tiff', converted_image_name)
+        print('Converted!')
+    else:
+        print('Used cached conversion!')
+    run_cmake()
+    print('Cmake succeeed!')
+    filename = build(is_debug=False)
+    output = run(filename, [converted_image_name])
+    print('Done!')
+    read_image(output, 'result.tiff')
 
 if __name__ == '__main__':
     main()

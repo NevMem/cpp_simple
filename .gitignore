@@ -11,5 +11,6 @@ main.sln
 result.vcxproj
 result.vcxproj.filters
 Debug/**
+Release/**
 result.dir/**
 x64/**
